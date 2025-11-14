@@ -1,0 +1,24 @@
+# Node / Vue / Vite
+node_modules/
+dist/
+
+# Laravel
+/vendor/
+.env
+.env.*
+storage/
+bootstrap/cache/
+
+# Python
+__pycache__/
+venv/
+env/
+
+# Ruby
+.bundle/
+log/
+tmp/
+vendor/
+
+# General
+.DS_Store
