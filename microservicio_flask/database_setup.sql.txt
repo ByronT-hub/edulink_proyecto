@@ -1,0 +1,95 @@
+-- BASE DE DATOS EDULINK
+
+-- CREAR BASE DE DATOS
+CREATE DATABASE IF NOT EXISTS edulink_payments_db
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+
+
+-- CREAR TABLAS 
+CREATE TABLE IF NOT EXISTS cards (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  pan_hash CHAR(64) NOT NULL UNIQUE,
+  last4 VARCHAR(4) NOT NULL,
+  exp_mm CHAR(2) NOT NULL,
+  exp_yy CHAR(2) NOT NULL,
+  balance_cents BIGINT NOT NULL DEFAULT 0,
+  status ENUM('active','blocked') NOT NULL DEFAULT 'active',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+CREATE TABLE IF NOT EXISTS authorizations (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  card_id INT NOT NULL,
+  amount_cents BIGINT NOT NULL,
+  auth_code VARCHAR(12) NOT NULL,
+  timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (card_id) REFERENCES cards(id)
+);
+
+
+
+-- INSERTAR DATOS DE TARJETAS
+INSERT INTO cards (pan_hash, last4, exp_mm, exp_yy, balance_cents, status)
+VALUES
+-- Tarjeta 1: VISA de pruebas, con Q 4,650.00
+('9bbef19476623ca56c17da75fd57734dbf82530686043a6e491c6d71befe8f6e', '1111', '11', '26', 465000, 'active'),
+
+-- Tarjeta 2: con Q 3,000.00
+('acd08f29a41f2e55ab0c4f774b1562b03ff01a905ed5b100f4facd43af572b1b', '0002', '08', '25', 300000, 'active'),
+
+-- Tarjeta 3: con Q 10,000.00
+('bb504e063c44a667e4680b56a80acefeaa40827f2f7b1acf211b503c440be292', '0003', '09', '27', 1000000, 'active'),
+
+-- Tarjeta 4: con Q 2,500.00
+('f12e176a292023d5b3e0ca17c5a51cb77773621bf05c91709259b60d07060622', '0004', '10', '25', 250000, 'active');
+
+
+-- VERIFICAR LAS TARJETAS 
+SELECT * FROM cards;
+
+
+
+
+-- EJECUTAR PARA DAR PERMISOS 
+GRANT ALL PRIVILEGES ON edulink_payments_db.* TO 'flask_user'@'%';
+FLUSH PRIVILEGES;
+
+
+
+-- VERIFICAR DATOS DE PRUEBA 
+SELECT * FROM authorizations ORDER BY id DESC;
+
+
+SELECT * FROM cards WHERE id = 1;
+
+
+
+-- CREAR TABLAS INSCRIPCIONES Y CERTIFICADOS 
+CREATE TABLE inscripciones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    estudiante_id INT NOT NULL,
+    curso_id INT NOT NULL,
+    estado VARCHAR(20) DEFAULT 'completado'
+);
+
+CREATE TABLE certificados (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    inscripcion_id INT NOT NULL,
+    codigo VARCHAR(50) NOT NULL UNIQUE,
+    fecha_emision DATE NOT NULL,
+    FOREIGN KEY (inscripcion_id) REFERENCES inscripciones(id)
+);
+
+
+-- INSERTAR DATOS DE PRUEBA 
+INSERT INTO inscripciones (estudiante_id, curso_id, estado)
+VALUES (1, 1, 'completado');
+
+INSERT INTO certificados (inscripcion_id, codigo, fecha_emision)
+VALUES (1, 'CERT123456', '2025-11-16');
+
+

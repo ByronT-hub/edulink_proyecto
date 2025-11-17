@@ -10,7 +10,7 @@ def get_pagos_connection():
         port=3307,
         user="flask_user",
         password="admon",
-        database="edulink_microservicio",
+        database="edulink_payments_db",
         cursorclass=pymysql.cursors.DictCursor,
     )
 
@@ -25,6 +25,6 @@ def get_app_connection():
         port=3307,
         user="flask_user",
         password="admon",
-        database="edulink_microservicio",
+        database="edulink_payments_db",
         cursorclass=pymysql.cursors.DictCursor,
     )

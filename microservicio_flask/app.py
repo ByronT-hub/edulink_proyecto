@@ -1,5 +1,4 @@
 from flask import Flask
-from config import Config
 from models.db import get_db, close_db
 
 from controllers.payment_controller import payment_bp
@@ -7,9 +6,8 @@ from controllers.certificate_controller import certificate_bp
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(Config)
 
-    # Activar conexión y cierre automático
+    # Activar cierre automático de la conexión
     app.teardown_appcontext(close_db)
 
     # Registrar rutas

@@ -1,18 +1,18 @@
 import pymysql
-from flask import current_app, g
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def get_db():
-    if 'db' not in g:
-        g.db = pymysql.connect(
-            host=current_app.config['MYSQL_HOST'],
-            user=current_app.config['MYSQL_USER'],
-            password=current_app.config['MYSQL_PASSWORD'],
-            database=current_app.config['MYSQL_DATABASE'],
-            cursorclass=pymysql.cursors.DictCursor
-        )
-    return g.db
+    return pymysql.connect(
+        host=os.getenv("DB_PAGOS_HOST"),
+        port=int(os.getenv("DB_PAGOS_PORT")),
+        user=os.getenv("DB_PAGOS_USER"),
+        password=os.getenv("DB_PAGOS_PASSWORD"),
+        database=os.getenv("DB_PAGOS_NAME"),
+        cursorclass=pymysql.cursors.DictCursor,
+    )
 
 def close_db(e=None):
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
+    pass

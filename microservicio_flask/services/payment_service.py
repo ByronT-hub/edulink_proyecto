@@ -9,47 +9,47 @@ def procesar_pago(data):
     db = get_db()
     cursor = db.cursor()
 
-    merchant_ref = data["referencia"]
-    amount = int(data["monto_centavos"])
-    tarjeta = data["tarjeta"]
+    merchant_ref = data["merchant_ref"]
+    amount = int(data["amount_cents"])
+    tarjeta = data["card"]
 
     pan_hash = hash_pan(tarjeta["pan"])
 
-    # 1) Buscar tarjeta por hash
-    cursor.execute("SELECT * FROM cards WHERE hash_pan=%s", (pan_hash,))
+    # 1) Buscar tarjeta correcta
+    cursor.execute("SELECT * FROM cards WHERE pan_hash=%s", (pan_hash,))
     card = cursor.fetchone()
 
     if not card:
-        return { "approved": False, "message": "Tarjeta no encontrada" }
+        return {"approved": False, "message": "Tarjeta no encontrada"}
 
-    # 2) Validar tarjeta activa
+    # 2) Tarjeta activa
     if card["status"] != "active":
-        return { "approved": False, "message": "Tarjeta bloqueada" }
+        return {"approved": False, "message": "Tarjeta bloqueada"}
 
-    # 3) Validar expiración
+    # 3) Expiración
     if tarjeta["exp_mm"] != card["exp_mm"] or tarjeta["exp_yy"] != card["exp_yy"]:
-        return { "approved": False, "message": "Tarjeta expirada" }
+        return {"approved": False, "message": "Tarjeta expirada"}
 
-    # 4) Validar saldo
+    # 4) Fondos suficientes
     if card["balance_cents"] < amount:
-        return { "approved": False, "message": "Fondos insuficientes" }
+        return {"approved": False, "message": "Fondos insuficientes"}
 
-    # 5) Descontar saldo
+    # 5) Actualizar saldo
     nuevo_saldo = card["balance_cents"] - amount
-    cursor.execute("UPDATE cards SET balance_cents=%s WHERE id=%s", (nuevo_saldo, card["id"]))
+    cursor.execute(
+        "UPDATE cards SET balance_cents=%s WHERE id=%s",
+        (nuevo_saldo, card["id"])
+    )
 
-    # 6) Registrar autorización
+    # 6) Registrar autorización (según tu tabla)
     auth_code = generar_codigo()
-
-    cursor.execute("""
-        INSERT INTO authorizations
-        (merchant_ref, amount_cents, currency, result, message, auth_code, card_id)
-        VALUES (%s, %s, 'GTQ', 'approved', 'Pago aprobado', %s, %s)
-    """, (merchant_ref, amount, auth_code, card["id"]))
+    cursor.execute(
+        "INSERT INTO authorizations (card_id, amount_cents, auth_code) VALUES (%s, %s, %s)",
+        (card["id"], amount, auth_code)
+    )
 
     db.commit()
 
-    # 7) Respuesta final
     return {
         "approved": True,
         "auth_code": auth_code,
