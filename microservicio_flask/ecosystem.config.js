@@ -2,22 +2,23 @@ module.exports = {
   apps: [
     {
       name: "edulink-flask-1",
-      script: "./venv/bin/gunicorn",
-      args: "app:app -b 0.0.0.0:5055",
-      cwd: __dirname,
+      script: "app.py",
+      interpreter: "/mnt/c/Users/Byron Tobar/Documents/edulink_proyecto/microservicio_flask/venv/bin/python",
+      cwd: "/mnt/c/Users/Byron Tobar/Documents/edulink_proyecto/microservicio_flask",
       env: {
-        FLASK_ENV: "production"
+        FLASK_ENV: "production",
+        PORT: 5055
       }
     },
     {
       name: "edulink-flask-2",
-      script: "./venv/bin/gunicorn",
-      args: "app:app -b 0.0.0.0:5056",
-      cwd: __dirname,
+      script: "app.py",
+      interpreter: "/mnt/c/Users/Byron Tobar/Documents/edulink_proyecto/microservicio_flask/venv/bin/python",
+      cwd: "/mnt/c/Users/Byron Tobar/Documents/edulink_proyecto/microservicio_flask",
       env: {
-        FLASK_ENV: "production"
+        FLASK_ENV: "production",
+        PORT: 5056
       }
     }
   ]
 }
-
