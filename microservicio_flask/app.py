@@ -1,47 +1,28 @@
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask import Flask
+from config import Config
+from models.db import get_db, close_db
 
-app = Flask(__name__)
-CORS(app)
+from controllers.payment_controller import payment_bp
+from controllers.certificate_controller import certificate_bp
 
-# ====== Endpoint de pago: /api/cards/authorize ======
-@app.route("/api/cards/authorize", methods=["POST"])
-def authorize_card():
-    """
-    Versión básica de prueba:
-    - Lee el JSON del cuerpo.
-    - Siempre aprueba el pago con un auth_code de ejemplo.
-    - Luego tú podrás conectar esto a MySQL y validar saldo/estado de tarjeta.
-    """
-    data = request.get_json(force=True) or {}
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
 
-    # Solo para pruebas, sin lógica real todavía
-    response = {
-        "approved": True,
-        "auth_code": "TEST1234",
-        "message": "Pago simulado aprobado (microservicio en modo demo)."
-    }
-    return jsonify(response), 200
+    # Activar conexión y cierre automático
+    app.teardown_appcontext(close_db)
 
+    # Registrar rutas
+    app.register_blueprint(payment_bp, url_prefix="/api")
+    app.register_blueprint(certificate_bp, url_prefix="/api")
 
-# ====== Endpoint de validación de certificados: /api/validate/<code> ======
-@app.route("/api/validate/<code>", methods=["GET"])
-def validate_certificate(code):
-    """
-    Versión básica de prueba:
-    - Devuelve datos simulados de un certificado.
-    - Luego lo vas a conectar a tu tabla de certificados en MySQL.
-    """
-    result = {
-        "code": code,
-        "estudiante": "Estudiante de prueba",
-        "curso": "Curso de ejemplo",
-        "fecha_emision": "2025-11-14",
-        "valido": True
-    }
-    return jsonify(result), 200
+    @app.get("/")
+    def home():
+        return {"message": "Microservicio Flask funcionando"}
 
+    return app
 
-# Punto de entrada para pruebas locales (python app.py)
+app = create_app()
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5055, debug=True)
+    app.run(port=5055, debug=True)
