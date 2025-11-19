@@ -13,16 +13,17 @@ def procesar_pago(data):
     amount = int(data["amount_cents"])
     tarjeta = data["card"]
 
+    # Encriptar PAN
     pan_hash = hash_pan(tarjeta["pan"])
 
-    # 1) Buscar tarjeta correcta
+    # 1) Buscar tarjeta
     cursor.execute("SELECT * FROM cards WHERE pan_hash=%s", (pan_hash,))
     card = cursor.fetchone()
 
     if not card:
         return {"approved": False, "message": "Tarjeta no encontrada"}
 
-    # 2) Tarjeta activa
+    # 2) Estado activo
     if card["status"] != "active":
         return {"approved": False, "message": "Tarjeta bloqueada"}
 
@@ -34,14 +35,14 @@ def procesar_pago(data):
     if card["balance_cents"] < amount:
         return {"approved": False, "message": "Fondos insuficientes"}
 
-    # 5) Actualizar saldo
+    # 5) Descontar saldo
     nuevo_saldo = card["balance_cents"] - amount
     cursor.execute(
         "UPDATE cards SET balance_cents=%s WHERE id=%s",
         (nuevo_saldo, card["id"])
     )
 
-    # 6) Registrar autorización (según tu tabla)
+    # 6) Registrar autorización
     auth_code = generar_codigo()
     cursor.execute(
         "INSERT INTO authorizations (card_id, amount_cents, auth_code) VALUES (%s, %s, %s)",
