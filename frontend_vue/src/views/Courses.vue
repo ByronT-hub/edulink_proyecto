@@ -249,7 +249,8 @@ const procesarPago = async () => {
   };
 
   try {
-    const res = await fetch("http://172.18.68.178:5055/api/tarjetas/autorizar", {
+    // ⭐ CORREGIDO → siempre localhost
+    const res = await fetch("http://127.0.0.1:5055/api/tarjetas/autorizar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -257,7 +258,11 @@ const procesarPago = async () => {
 
     const data = await res.json();
 
-    if (!res.ok) throw new Error(data.error || "No se autorizó el pago");
+    if (!data.approved) {
+      alert("❌ Pago rechazado: " + (data.message || "No autorizado"));
+      enrolling.value = null;
+      return;
+    }
 
     alert("✔ Pago aprobado\nCódigo: " + data.auth_code);
     showPaymentModal.value = false;

@@ -2,7 +2,7 @@ import axios from 'axios'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
 
-// Crear instancia de axios
+// Crear instancia de axios para Laravel
 export const apiClient = axios.create({
   baseURL: API_URL,
   headers: {
@@ -38,5 +38,13 @@ apiClient.interceptors.response.use(
     return Promise.reject(error)
   }
 )
+
+// 🔥🔥🔥 NUEVO: Cliente para el microservicio Flask (tarjetas)
+export const paymentsClient = axios.create({
+  baseURL: 'http://127.0.0.1:5055/api',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+})
 
 export default apiClient

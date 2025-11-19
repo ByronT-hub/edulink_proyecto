@@ -154,7 +154,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import apiClient from '@/services/api'
+import apiClient, { paymentsClient } from '@/services/api'
 import { useCoursesStore } from '@/stores/courses'
 import { useStudentStore } from '@/stores/student'
 
@@ -197,14 +197,17 @@ const processPayment = async () => {
 
   processing.value = true
   errorMessage.value = ''
+  successMessage.value = ''
 
   try {
     const [exp_mm, exp_yy] = cardData.value.expiracion.split('/')
 
     const payload = {
-      curso_id: course.value.id,
-      tarjeta: {
-        nombre: cardData.value.titular,
+      merchant_ref: `curso-${course.value.id}`,
+      amount_cents: course.value.precio * 100,
+      currency: "GTQ",
+      card: {
+        holder_name: cardData.value.titular,
         pan: cardData.value.numero.replace(/\s/g, ''),
         exp_mm,
         exp_yy,
@@ -212,13 +215,22 @@ const processPayment = async () => {
       }
     }
 
-    const response = await apiClient.post('/pagos/autorizar', payload)
+    // 🔥 AHORA SÍ USA FLASK
+    const response = await paymentsClient.post('/tarjetas/autorizar', payload)
+    const data = response.data
 
-    successMessage.value = 'Pago aprobado. Redirigiendo...'
+    if (!data.approved) {
+      errorMessage.value = data.message || "Pago rechazado"
+      return
+    }
+
+    // ✔ PAGO APROBADO
+    successMessage.value = `Pago aprobado. Código: ${data.auth_code}`
+
     setTimeout(() => router.push('/dashboard'), 2000)
 
   } catch (error: any) {
-    errorMessage.value = error.response?.data?.mensaje || 'Error al procesar el pago'
+    errorMessage.value = error.response?.data?.message || 'Error al procesar el pago'
   } finally {
     processing.value = false
   }
@@ -232,12 +244,9 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* ⛔ Mantuve TODOS tus estilos CSS — NO eliminé nada */
 .payment {
   padding: 2rem 0;
   background: #f8f9fa;
   min-height: calc(100vh - 140px);
 }
-
-/* ... resto de tus estilos iguales ... */
 </style>
