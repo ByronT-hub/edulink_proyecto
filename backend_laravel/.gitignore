@@ -1,37 +1,24 @@
-# Node / Vue / Vite
-node_modules/
-dist/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Laravel / PHP
-/vendor/
-.env
-.env.*
-.phpunit.result.cache
-storage/*.key
-storage/logs/*
-storage/framework/cache/*
-storage/framework/sessions/*
-storage/framework/views/*
-bootstrap/cache/*
-
-# Python / Flask
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-.env_flask
-venv/
-env/
-
-# Ruby
-.bundle/
-log/*
-tmp/*
-vendor/bundle/
-
-# Otros
+*.log
 .DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+Homestead.json
+Homestead.yaml
+Thumbs.db
