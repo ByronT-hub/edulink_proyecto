@@ -75,21 +75,27 @@ Route::middleware(['simple_auth'])->group(function () {
 // ======================================================
 // === RUTAS DE MAESTROS (maestro o admin) ==============
 // ======================================================
-Route::middleware(['role:maestro,admin'])->group(function () {
+Route::middleware(['simple_auth'])->group(function () {
 
-    // Perfil del maestro
-    Route::get('/maestros/{id}/perfil', [MaestroController::class, 'perfil']);
-    Route::put('/maestros/{id}/perfil', [MaestroController::class, 'actualizarPerfil']);
-    
-    // Gestión de cursos por maestros
-    Route::post('/maestros/cursos', [MaestroController::class, 'crearCurso']);
-    Route::get('/maestros/{maestro_id}/cursos', [MaestroController::class, 'misCursos']);
-    Route::put('/maestros/cursos/{id}', [MaestroController::class, 'editarCurso']);
-    Route::delete('/maestros/cursos/{id}', [MaestroController::class, 'eliminarCurso']);
-    
-    // Búsqueda de estudiantes
-    Route::get('/maestros/estudiantes/buscar', [MaestroController::class, 'buscarEstudiantes']);
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::get('/auth/me', [AuthController::class, 'me']);
+
+    // Inscripciones
+    Route::post('/cursos/{id}/inscribirse', [InscripcionController::class, 'inscribirse']);
+    Route::get('/mis-cursos', [InscripcionController::class, 'misCursos']);
+    Route::get('/inscripciones/{id}', [InscripcionController::class, 'detalles']);
+    Route::post('/inscripciones', [InscripcionController::class, 'store']);
+    Route::get('/inscripciones', [InscripcionController::class, 'index']);
+
+    // Pagos
+    Route::post('/pagos/autorizar', [PagoController::class, 'autorizar']);
+    Route::get('/pagos/mis-pagos', [PagoController::class, 'misPagos']);
+
+    // Certificados
+    Route::get('/certificados/{id}', [CertificadoController::class, 'show']);
+    Route::get('/mis-certificados', [CertificadoController::class, 'misCertificados']);
 });
+
 
 
 

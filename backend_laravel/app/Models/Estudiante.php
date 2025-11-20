@@ -19,11 +19,8 @@ class Estudiante extends Authenticatable
         'carnet'
     ];
 
-    protected $hidden = [
-        'contrasena',
-    ];
+    protected $hidden = ['contrasena'];
 
-    // Sobrescribir el campo password para autenticación
     public function getAuthPassword()
     {
         return $this->contrasena;

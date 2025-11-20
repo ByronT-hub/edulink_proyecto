@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace App\Http\Controllers;
 
@@ -13,11 +13,9 @@ use Carbon\Carbon;
 
 class PagoController extends Controller
 {
-    /**
-     * Autorizar pago y generar inscripción automáticamente
-     */
     public function autorizar(Request $request)
     {
+        // Validar payload
         $data = $request->validate([
             'curso_id'        => 'required|exists:cursos,id',
             'tarjeta'         => 'required|array',
@@ -28,141 +26,121 @@ class PagoController extends Controller
             'tarjeta.ccv'     => 'required|string',
         ]);
 
-        // Obtener estudiante autenticado (middleware simpleauth)
+        // 🔥 Asegurar autenticación
         $estudiante = $request->auth_user;
+        $role = $request->auth_role;
 
-        if (!$estudiante || $request->auth_role !== 'estudiante') {
+        if (!$estudiante || $role !== 'estudiante') {
             return response()->json(['error' => 'No autorizado'], 401);
         }
 
-        // Verificar curso
+        // Obtener curso
         $curso = Curso::findOrFail($data['curso_id']);
 
-        // Verificar que no esté inscrito ya
-        $yaInscrito = Inscripcion::where('estudiante_id', $estudiante->id)
-                                ->where('curso_id', $curso->id)
-                                ->exists();
-
-        if ($yaInscrito) {
-            return response()->json(['error' => 'Ya estás inscrito en este curso'], 409);
+        // Evitar inscripciones duplicadas
+        if (Inscripcion::where('estudiante_id', $estudiante->id)
+            ->where('curso_id', $curso->id)
+            ->exists())
+        {
+            return response()->json(['error' => 'Ya estás inscrito'], 409);
         }
 
-        // --------------------------------------
-        // Preparar payload EXACTO para Flask
-        // --------------------------------------
-        $payloadFlask = [
-            'merchant_ref'   => "curso-{$curso->id}-est-{$estudiante->id}",
-            'amount_cents'   => intval($curso->precio * 100),
-            'currency'       => "GTQ",
-            'card'           => [
-                "holder_name" => $data["tarjeta"]["nombre"],
-                "pan"         => $data["tarjeta"]["pan"],
-                "exp_mm"      => $data["tarjeta"]["exp_mm"],
-                "exp_yy"      => $data["tarjeta"]["exp_yy"],
-                "ccv"         => $data["tarjeta"]["ccv"],
+        // Payload para Flask
+        $payload = [
+            'merchant_ref' => "curso-{$curso->id}-est-{$estudiante->id}",
+            'amount_cents' => intval($curso->precio * 100),
+            'currency'     => "GTQ",
+            'card'         => [
+                'holder_name' => $data['tarjeta']['nombre'],
+                'pan'         => $data['tarjeta']['pan'],
+                'exp_mm'      => $data['tarjeta']['exp_mm'],
+                'exp_yy'      => $data['tarjeta']['exp_yy'],
+                'ccv'         => $data['tarjeta']['ccv'],
             ]
         ];
 
-        // --------------------------------------
-        // Enviar al microservicio Flask
-        // --------------------------------------
+        // URL del microservicio
         $url = env("FLASK_URL", "http://127.0.0.1:5055") . "/api/tarjetas/autorizar";
 
-        $response = Http::post($url, $payloadFlask);
+        try {
+            $response = Http::timeout(10)->post($url, $payload);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error'   => 'Microservicio no responde',
+                'detalle' => $e->getMessage()
+            ], 500);
+        }
 
         if (!$response->successful()) {
             return response()->json([
-                'error' => 'Error comunicando con el microservicio de pagos',
+                'error'   => 'Error al comunicarse con microservicio',
                 'detalle' => $response->body()
-            ], 502);
+            ], 500);
         }
 
-        $body = $response->json();
+        $res = $response->json();
+        $approved = $res['approved'] ?? false;
+        $authCode = $res['auth_code'] ?? null;
+        $mensaje  = $res['message'] ?? "Error desconocido";
 
-        $approved = $body['approved'] ?? false;
-        $authCode = $body['auth_code'] ?? null;
-        $message  = $body['message'] ?? 'Error inesperado';
+        // Si fue rechazado
+        if (!$approved) {
 
-        // --------------------------------------
-        // 1. Crear inscripción
-        // --------------------------------------
+            $inscripcion = Inscripcion::create([
+                'estudiante_id' => $estudiante->id,
+                'curso_id'      => $curso->id,
+                'estado'        => 'rechazado'
+            ]);
+
+            $pago = Pago::create([
+                'inscripcion_id'      => $inscripcion->id,
+                'monto_centavos'      => intval($curso->precio * 100),
+                'moneda'              => 'GTQ',
+                'estado'              => 'rejected',
+                'codigo_autorizacion' => null,
+                'mensaje'             => $mensaje,
+            ]);
+
+            return response()->json([
+                'message'      => "Pago rechazado: $mensaje",
+                'estado'       => 'rejected',
+                'inscripcion'  => $inscripcion,
+                'pago'         => $pago,
+                'certificado'  => null
+            ], 409);
+        }
+
+        // SI FUE APROBADO — INSCRIPCIÓN
         $inscripcion = Inscripcion::create([
             'estudiante_id' => $estudiante->id,
             'curso_id'      => $curso->id,
-            'estado'        => $approved ? 'pagado' : 'pendiente',
+            'estado'        => 'pagado'
         ]);
 
-        // --------------------------------------
-        // 2. Registrar pago
-        // --------------------------------------
+        // REGISTRO DE PAGO
         $pago = Pago::create([
-            'inscripcion_id'     => $inscripcion->id,
-            'monto_centavos'     => intval($curso->precio * 100),
-            'moneda'             => 'GTQ',
-            'estado'             => $approved ? "approved" : "rejected",
-            'codigo_autorizacion'=> $authCode,
-            'mensaje'            => $message,
+            'inscripcion_id'      => $inscripcion->id,
+            'monto_centavos'      => intval($curso->precio * 100),
+            'moneda'              => 'GTQ',
+            'estado'              => 'approved',
+            'codigo_autorizacion' => $authCode,
+            'mensaje'             => $mensaje,
         ]);
 
-        // --------------------------------------
-        // 3. Generar certificado SOLO si aprobó
-        // --------------------------------------
-        $certificado = null;
-
-        if ($approved) {
-            $certificado = $this->generarCertificado($inscripcion);
-        }
+        // CERTIFICADO
+        $certificado = Certificado::create([
+            'inscripcion_id' => $inscripcion->id,
+            'codigo'         => 'CERT-' . Str::upper(Str::random(6)),
+            'url_qr'         => env("FLASK_URL") . "/api/validar/" . $authCode,
+            'fecha_emision'  => Carbon::now(),
+        ]);
 
         return response()->json([
-            'message'      => 'Pago procesado',
-            'estado'       => $approved ? "approved" : "rejected",
-            'pago'         => $pago,
+            'message'      => 'Pago aprobado',
+            'estado'       => 'approved',
             'inscripcion'  => $inscripcion->load('curso'),
+            'pago'         => $pago,
             'certificado'  => $certificado,
         ]);
     }
-
-    /**
-     * Generar certificado si el pago fue aprobado
-     */
-    protected function generarCertificado(Inscripcion $inscripcion): Certificado
-    {
-        // Generar código único
-        do {
-            $codigo = 'CERT-' . Str::upper(Str::random(6));
-        } while (Certificado::where('codigo', $codigo)->exists());
-
-        // URL para validar en Flask
-        $urlQr = env("FLASK_URL", "http://127.0.0.1:5055") . "/api/validar/" . $codigo;
-
-        return Certificado::create([
-            'inscripcion_id' => $inscripcion->id,
-            'codigo'         => $codigo,
-            'url_qr'         => $urlQr,
-            'fecha_emision'  => Carbon::now(),
-        ]);
-    }
-
-    public function misPagos(Request $request)
-{
-    $estudiante = $request->auth_user;
-
-    if (!$estudiante || $request->auth_role !== 'estudiante') {
-        return response()->json(['error' => 'No autorizado'], 401);
-    }
-
-    // Obtener todos los pagos del estudiante autenticado
-    $pagos = Pago::whereHas('inscripcion', function ($q) use ($estudiante) {
-        $q->where('estudiante_id', $estudiante->id);
-    })
-    ->with(['inscripcion.curso'])
-    ->orderBy('created_at', 'desc')
-    ->get();
-
-    return response()->json([
-        'total' => $pagos->count(),
-        'pagos' => $pagos,
-    ]);
-}
-
 }

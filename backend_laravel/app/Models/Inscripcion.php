@@ -4,6 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Estudiante;
+use App\Models\Curso;
+use App\Models\Pago;
+use App\Models\Certificado; // <-- 🔥 IMPORTANTE, FALTABA
 
 class Inscripcion extends Model
 {
@@ -14,7 +18,7 @@ class Inscripcion extends Model
     protected $fillable = [
         'estudiante_id',
         'curso_id',
-        'estado',
+        'estado'
     ];
 
     public function estudiante()
@@ -27,9 +31,9 @@ class Inscripcion extends Model
         return $this->belongsTo(Curso::class);
     }
 
-    public function pago()
+    public function pagos()
     {
-        return $this->hasOne(Pago::class);
+        return $this->hasMany(Pago::class);
     }
 
     public function certificado()

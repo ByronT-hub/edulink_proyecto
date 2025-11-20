@@ -4,31 +4,36 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use App\Http\Controllers\AuthController;
 use App\Models\Estudiante;
 use App\Models\Maestro;
 use App\Models\User;
-use App\Http\Controllers\AuthController;
 
 class SimpleAuthMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
+        // 1) OBTENER TOKEN
         $token = $request->bearerToken();
 
         if (!$token) {
-            return response()->json(['error' => 'Token no proporcionado'], 401);
+            return response()->json(['error' => 'Token no enviado'], 401);
         }
 
+        // 2) VALIDAR TOKEN
         $payload = AuthController::validateToken($token);
 
         if (!$payload) {
-            return response()->json(['error' => 'Token inválido o expirado'], 401);
+            return response()->json(['error' => 'Token inválido'], 401);
         }
 
-        // Obtener usuario según el rol
-        if ($payload['role'] === 'estudiante') {
+        // 3) OBTENER EL USUARIO SEGÚN EL ROL
+        $role = $payload['role'] ?? null;
+        $user = null;
+
+        if ($role === 'estudiante') {
             $user = Estudiante::find($payload['user_id']);
-        } elseif ($payload['role'] === 'maestro') {
+        } elseif ($role === 'maestro') {
             $user = Maestro::find($payload['user_id']);
         } else {
             $user = User::find($payload['user_id']);
@@ -38,13 +43,13 @@ class SimpleAuthMiddleware
             return response()->json(['error' => 'Usuario no encontrado'], 404);
         }
 
-        // 👍 Guardar usuario y rol para los controladores
+        // 4) PASAR DATOS AL REQUEST → NECESARIO PARA PagoController
         $request->merge([
             'auth_user' => $user,
-            'auth_role' => $payload['role'],
+            'auth_role' => $role,
         ]);
 
-        // Laravel también podrá hacer $request->user()
+        // Configurar user() para Laravel
         $request->setUserResolver(function () use ($user) {
             return $user;
         });

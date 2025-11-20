@@ -16,7 +16,7 @@ class Curso extends Model
     protected $fillable = [
         'titulo',
         'descripcion',
-        'precio',                // <--- este es el precio oficial
+        'precio',
         'duracion',
         'categoria',
         'nivel',
@@ -29,7 +29,7 @@ class Curso extends Model
     ];
 
     protected $casts = [
-        'precio' => 'decimal:2',       // precio como decimal
+        'precio' => 'decimal:2',
         'duracion' => 'integer',
         'calificacion_promedio' => 'decimal:1',
         'estudiantes_inscritos' => 'integer',
@@ -37,26 +37,23 @@ class Curso extends Model
         'activo' => 'boolean'
     ];
 
-    // Relación con inscripciones
     public function inscripciones(): HasMany
     {
         return $this->hasMany(Inscripcion::class);
     }
 
-    // Relación CORREGIDA con certificados a través de inscripciones
     public function certificados()
     {
         return $this->hasManyThrough(
             Certificado::class,
             Inscripcion::class,
-            'curso_id',        // FK en inscripciones
-            'inscripcion_id',  // FK en certificados
-            'id',              // PK en cursos
-            'id'               // PK en inscripciones
+            'curso_id',
+            'inscripcion_id',
+            'id',
+            'id'
         );
     }
 
-    // Relación con maestro
     public function maestro(): BelongsTo
     {
         return $this->belongsTo(Maestro::class);
