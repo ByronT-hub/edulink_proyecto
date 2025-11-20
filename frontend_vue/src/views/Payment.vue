@@ -215,7 +215,7 @@ const processPayment = async () => {
       }
     }
 
-    // 🔥 AHORA SÍ USA FLASK
+    // LLAMADA AL MICROSERVICIO
     const response = await paymentsClient.post('/tarjetas/autorizar', payload)
     const data = response.data
 
@@ -224,8 +224,19 @@ const processPayment = async () => {
       return
     }
 
-    // ✔ PAGO APROBADO
     successMessage.value = `Pago aprobado. Código: ${data.auth_code}`
+
+    // LLAMAR A LARAVEL
+    await apiClient.post('/pagos/autorizar', {
+      curso_id: course.value.id,
+      tarjeta: {
+        nombre: cardData.value.titular,
+        pan: cardData.value.numero,
+        exp_mm,
+        exp_yy,
+        ccv: cardData.value.cvv
+      }
+    })
 
     setTimeout(() => router.push('/dashboard'), 2000)
 

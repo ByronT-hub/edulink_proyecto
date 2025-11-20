@@ -104,12 +104,36 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.home {
-  width: 100%;
+/* Paleta de Colores Esmeralda Sutil y Apagado */
+:root {
+  /* Verde Esmeralda sutil, tirando más a un verde grisáceo o bosque claro */
+  --emerald-primary: #558B84; 
+  /* Tono más oscuro para hover y botones principales */
+  --emerald-dark: #3E6C66;     
+  /* Fondo muy claro, casi blanco */
+  --neutral-background: #F8F9FB; 
+  /* Texto principal/fondo oscuro (azul medianoche) */
+  --neutral-dark: #34495e;     
+  /* Acento muy claro y suave */
+  --accent-highlight: #A3D8C3; 
+  --border-radius-primary: 16px; 
 }
 
+/* --- ESTILO GLOBAL DE FUENTE --- */
+.home {
+  width: 100%;
+  font-family: 'Poppins', 'Roboto', 'Arial', sans-serif; 
+}
+
+/* --- TIPOGRAFÍA DE ENCABEZADOS Y TITULOS --- */
+.hero-title, .section-title, .cta-content h2 {
+  font-weight: 700; 
+}
+
+/* --- SECCIÓN HERO (Banner Principal) --- */
 .hero {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* Aplicación de la paleta sutil */
+  background: linear-gradient(135deg, var(--emerald-primary) 0%, #7CB8B0 100%);
   color: white;
   padding: 4rem 0;
   display: flex;
@@ -128,14 +152,13 @@ onMounted(async () => {
 }
 
 .hero-title {
-  font-size: 3rem;
-  font-weight: bold;
+  font-size: 3.2rem; 
   margin-bottom: 1rem;
   line-height: 1.2;
 }
 
 .hero-subtitle {
-  font-size: 1.25rem;
+  font-size: 1.35rem; 
   margin-bottom: 2rem;
   opacity: 0.9;
   line-height: 1.6;
@@ -157,9 +180,10 @@ onMounted(async () => {
   font-size: 1.1rem;
 }
 
+/* --- SECCIÓN FEATURES (Características) --- */
 .features {
-  padding: 4rem 0;
-  background: #f8f9fa;
+  padding: 6rem 0; 
+  background: var(--neutral-background); /* Fondo extra claro */
 }
 
 .container {
@@ -170,50 +194,55 @@ onMounted(async () => {
 
 .section-title {
   text-align: center;
-  font-size: 2.5rem;
-  margin-bottom: 3rem;
-  color: #2c3e50;
+  font-size: 2.8rem; 
+  margin-bottom: 4rem; 
+  color: var(--neutral-dark); /* Texto oscuro */
 }
 
 .features-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
+  gap: 2.5rem; 
 }
 
 .feature-card {
   background: white;
-  padding: 2rem;
-  border-radius: 12px;
+  padding: 2.5rem; 
+  border-radius: var(--border-radius-primary); 
   text-align: center;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); 
+  /* Línea de acento muy sutil */
+  border-bottom: 4px solid var(--accent-highlight); 
+  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
 }
 
 .feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  transform: translateY(-7px); 
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+  border-color: var(--emerald-primary); /* El hover trae el color principal */
 }
 
 .feature-icon {
   font-size: 3rem;
   margin-bottom: 1rem;
+  color: var(--emerald-primary); /* Iconos con el tono principal sutil */
 }
 
 .feature-card h3 {
-  font-size: 1.5rem;
+  font-size: 1.6rem; 
   margin-bottom: 1rem;
-  color: #2c3e50;
+  color: var(--neutral-dark);
 }
 
 .feature-card p {
   color: #6c757d;
-  line-height: 1.6;
+  line-height: 1.7; 
 }
 
+/* --- SECCIÓN STATS (Estadísticas) --- */
 .stats {
-  padding: 4rem 0;
-  background: #2c3e50;
+  padding: 6rem 0;
+  background: var(--neutral-dark); /* Fondo oscuro (azul medianoche) */
   color: white;
 }
 
@@ -228,20 +257,21 @@ onMounted(async () => {
 }
 
 .stat-number {
-  font-size: 3rem;
-  font-weight: bold;
+  font-size: 3.5rem; 
+  font-weight: 700;
   margin-bottom: 0.5rem;
-  color: #ff6b6b;
+  color: var(--accent-highlight); /* Acento muy claro y sutil */
 }
 
 .stat-label {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   opacity: 0.9;
 }
 
+/* --- SECCIÓN CTA (Llamada a la Acción) --- */
 .cta {
-  padding: 4rem 0;
-  background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+  padding: 6rem 0;
+  background: var(--emerald-primary); /* El CTA usa el color principal sutil */
   color: white;
 }
 
@@ -250,37 +280,40 @@ onMounted(async () => {
 }
 
 .cta-content h2 {
-  font-size: 2.5rem;
+  font-size: 3rem; 
   margin-bottom: 1rem;
 }
 
 .cta-content p {
-  font-size: 1.25rem;
-  margin-bottom: 2rem;
+  font-size: 1.4rem; 
+  margin-bottom: 2.5rem; 
   opacity: 0.9;
 }
 
+/* --- ESTILOS DE BOTONES --- */
 .btn {
-  padding: 0.75rem 1.5rem;
+  padding: 0.8rem 1.8rem; 
   border: none;
-  border-radius: 8px;
+  border-radius: 50px; /* Estilo píldora */
   text-decoration: none;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.1rem;
   transition: all 0.3s;
   display: inline-block;
   text-align: center;
-  font-weight: 500;
+  font-weight: 600; 
 }
 
 .btn-primary {
-  background: #ff6b6b;
+  background: var(--emerald-dark); /* Botón principal más oscuro para buen contraste */
   color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); 
 }
 
 .btn-primary:hover {
-  background: #ee5a5a;
-  transform: translateY(-2px);
+  background: var(--emerald-primary); /* Se aclara ligeramente en hover */
+  transform: translateY(-3px); 
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .btn-outline {
@@ -291,9 +324,10 @@ onMounted(async () => {
 
 .btn-outline:hover {
   background: white;
-  color: #667eea;
+  color: var(--emerald-dark); 
 }
 
+/* --- MEDIA QUERIES (Responsividad) --- */
 @media (max-width: 768px) {
   .hero-content {
     grid-template-columns: 1fr;
@@ -301,19 +335,24 @@ onMounted(async () => {
   }
   
   .hero-title {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
   
   .hero-subtitle {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
   }
   
   .section-title {
-    font-size: 2rem;
+    font-size: 2.2rem;
+    margin-bottom: 3rem;
   }
   
   .cta-content h2 {
-    font-size: 2rem;
+    font-size: 2.2rem;
+  }
+  
+  .cta-content p {
+    font-size: 1.2rem;
   }
 }
 </style>

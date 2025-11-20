@@ -103,12 +103,30 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Paleta de Colores Esmeralda Sutil y Apagado */
+:root {
+  /* Verde Esmeralda sutil */
+  --emerald-primary: #558B84; 
+  /* Tono más oscuro para hover y botones principales */
+  --emerald-dark: #3E6C66;     
+  /* Fondo muy claro, casi blanco */
+  --neutral-background: #F8F9FB; 
+  /* Texto principal/fondo oscuro (azul medianoche) */
+  --neutral-dark: #34495e;     
+  /* Acento muy claro y suave */
+  --accent-highlight: #A3D8C3; 
+  --border-radius-primary: 16px; 
+}
+
+/* --- ESTILO GLOBAL DE FUENTE --- */
 .login {
   min-height: calc(100vh - 140px);
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* Fondo usando degradado sutil de esmeralda */
+  background: linear-gradient(135deg, var(--emerald-primary) 0%, #7CB8B0 100%);
   padding: 2rem 0;
+  font-family: 'Poppins', 'Roboto', 'Arial', sans-serif; 
 }
 
 .container {
@@ -119,13 +137,14 @@ onMounted(() => {
   justify-content: center;
 }
 
+/* --- CONTENEDOR DEL FORMULARIO --- */
 .login-form-container {
   background: white;
   padding: 3rem;
-  border-radius: 16px;
+  border-radius: var(--border-radius-primary); /* Bordes redondeados */
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 400px;
+  max-width: 420px; /* Ligeramente más ancho */
 }
 
 .login-header {
@@ -134,14 +153,15 @@ onMounted(() => {
 }
 
 .login-header h1 {
-  font-size: 2rem;
-  color: #2c3e50;
+  font-size: 2.2rem; /* Ligeramente más grande */
+  color: var(--neutral-dark);
   margin-bottom: 0.5rem;
+  font-weight: 700;
 }
 
 .login-header p {
   color: #6c757d;
-  font-size: 1rem;
+  font-size: 1.1rem;
 }
 
 .login-form {
@@ -149,21 +169,22 @@ onMounted(() => {
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.8rem; /* Más espacio entre grupos */
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
-  color: #2c3e50;
-  font-weight: 500;
+  margin-bottom: 0.6rem;
+  color: var(--neutral-dark);
+  font-weight: 600; /* Fuente más audaz */
 }
 
+/* --- INPUTS --- */
 .form-input {
   width: 100%;
-  padding: 1rem;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
+  padding: 1rem 1.25rem; /* Más padding horizontal */
+  border: 1px solid #e9ecef;
+  border-radius: 10px; /* Bordes suaves */
   font-size: 1rem;
   transition: border-color 0.3s, box-shadow 0.3s;
   box-sizing: border-box;
@@ -171,31 +192,33 @@ onMounted(() => {
 
 .form-input:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--emerald-primary); /* Acento esmeralda en foco */
+  box-shadow: 0 0 0 4px rgba(85, 139, 132, 0.15); /* Sombra suave de acento */
 }
 
 .form-input:disabled {
-  background-color: #f8f9fa;
+  background-color: var(--neutral-background);
   cursor: not-allowed;
 }
 
+/* --- MENSAJE DE ERROR --- */
 .error-message {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  color: #721c24;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
+  background: #fff3cd; /* Amarillo suave para error (neutral pero visible) */
+  border: 1px solid #ffe0a3;
+  color: #856404;
+  padding: 0.85rem 1.2rem;
+  border-radius: 10px;
+  margin-bottom: 1.8rem;
+  font-size: 0.95rem;
 }
 
+/* --- BOTONES --- */
 .btn {
   padding: 1rem 2rem;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
+  border-radius: 50px; /* Estilo píldora para elegancia moderna */
+  font-size: 1.1rem; /* Botón ligeramente más grande */
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
   text-decoration: none;
@@ -204,25 +227,29 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: #667eea;
+  background: var(--emerald-dark); /* Color más fuerte para el CTA */
   color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #5a6fd8;
-  transform: translateY(-1px);
+  background: var(--emerald-primary); /* Se aclara ligeramente en hover */
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .btn-primary:disabled {
-  background: #6c757d;
+  background: #b0c4de; /* Tono más neutro y suave cuando está deshabilitado */
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 .btn-full {
   width: 100%;
 }
 
+/* --- FOOTER --- */
 .login-footer {
   text-align: center;
 }
@@ -233,15 +260,16 @@ onMounted(() => {
 }
 
 .link {
-  color: #667eea;
+  color: var(--emerald-primary); /* Link usa el color principal esmeralda */
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .link:hover {
   text-decoration: underline;
 }
 
+/* --- MEDIA QUERIES (Responsividad) --- */
 @media (max-width: 768px) {
   .login-form-container {
     margin: 1rem;

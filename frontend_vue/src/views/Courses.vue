@@ -1,4 +1,4 @@
-<template>
+<template> 
   <div class="courses">
     <div class="container">
       <div class="courses-header">
@@ -175,6 +175,7 @@
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import apiClient from '@/services/api'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -227,60 +228,56 @@ const handleEnrollment = (course: any) => {
 }
 
 // ==========================
-// ⚠ CORREGIDO AQUÍ ⚠
+//  💳 PROCESAR PAGO — CORREGIDO
 // ==========================
 const procesarPago = async () => {
-
   if (!selectedCourse.value) return;
 
   enrolling.value = selectedCourse.value.id;
 
-  const payload = {
-    merchant_ref: `curso-${selectedCourse.value.id}`,
-    amount_cents: Math.round(Number(selectedCourse.value.precio) * 100),
-    currency: "GTQ",
-    card: {
-      holder_name: cardData.value.nombre_titular,
-      pan: cardData.value.numero_tarjeta,
-      exp_mm: cardData.value.fecha_expiracion.split("/")[0],
-      exp_yy: cardData.value.fecha_expiracion.split("/")[1],
-      ccv: cardData.value.cvv,
-    }
-  };
+  const [exp_mm, exp_yy] = cardData.value.fecha_expiracion.split('/');
 
   try {
-    // ⭐ CORREGIDO → siempre localhost
-    const res = await fetch("http://127.0.0.1:5055/api/tarjetas/autorizar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+    // 🔥 SOLO LLAMADA A LARAVEL — él llama a Flask internamente
+    const payloadLaravel = {
+      curso_id: selectedCourse.value.id,
+      tarjeta: {
+        nombre: cardData.value.nombre_titular,
+        pan: cardData.value.numero_tarjeta,
+        exp_mm,
+        exp_yy,
+        ccv: cardData.value.cvv
+      }
+    };
 
-    const data = await res.json();
+    const response = await apiClient.post('/pagos/autorizar', payloadLaravel);
 
-    if (!data.approved) {
-      alert("❌ Pago rechazado: " + (data.message || "No autorizado"));
-      enrolling.value = null;
-      return;
-    }
+    alert("✔ Pago aprobado y registrado correctamente");
+    console.log("Respuesta Laravel:", response.data);
 
-    alert("✔ Pago aprobado\nCódigo: " + data.auth_code);
     showPaymentModal.value = false;
 
   } catch (err: any) {
-    alert("Error: " + err.message);
+    console.error("ERROR PROCESANDO PAGO:", err);
+
+    let msg = "Error procesando pago";
+
+    if (err.response?.data?.message) msg = err.response.data.message;
+    if (err.response?.data?.error) msg = err.response.data.error;
+
+    alert("❌ " + msg);
   }
 
   enrolling.value = null;
-}
+};
 
 const fetchCourses = async () => {
   loading.value = true
   try {
-    const res = await fetch("http://localhost:8000/api/cursos")
+    const res = await fetch('http://localhost:8000/api/cursos')
     courses.value = await res.json()
   } catch (e) {
-    error.value = "No se pudieron cargar los cursos"
+    error.value = 'No se pudieron cargar los cursos'
   }
   loading.value = false
 }
@@ -289,5 +286,5 @@ onMounted(fetchCourses)
 </script>
 
 <style scoped>
-/* NO TOQUÉ NADA DEL DISEÑO */
+/* Tu CSS original */
 </style>
