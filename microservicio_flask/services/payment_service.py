@@ -1,83 +1,56 @@
 from models.db import get_db
-from utils.security import hash_pan
-import random, string
+import uuid
 
-# ==========================================================
-# 🔥 GENERAR CÓDIGO DE AUTORIZACIÓN
-# ==========================================================
-def generar_codigo():
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
-
-
-# ==========================================================
-# 🔥 LÓGICA PRINCIPAL DE AUTORIZACIÓN DE TARJETAS
-# ==========================================================
 def procesar_pago(data):
-    db = get_db()
-    cursor = db.cursor()
+    try:
+        card = data.get("card", {})
+        amount = data.get("amount_cents", 0)
 
-    merchant_ref = data["merchant_ref"]
-    amount = int(data["amount_cents"])
-    tarjeta = data["card"]
+        conn = get_db()
+        cursor = conn.cursor()
 
-    # Encriptar PAN
-    pan_hash = hash_pan(tarjeta["pan"])
+        cursor.execute(
+            "SELECT * FROM cards WHERE last4 = %s LIMIT 1",
+            (card["pan"][-4:],)
+        )
+        tarjeta = cursor.fetchone()
 
-    # ----------------------------------------------------------
-    # 1) Buscar tarjeta en base de datos
-    # ----------------------------------------------------------
-    cursor.execute("SELECT * FROM cards WHERE pan_hash=%s", (pan_hash,))
-    card = cursor.fetchone()
+        if not tarjeta:
+            return {"approved": False, "message": "Tarjeta no encontrada"}
 
-    if not card:
-        return {"approved": False, "message": "Tarjeta no encontrada"}
+        if int(card["exp_yy"]) < 25:
+            return {"approved": False, "message": "Tarjeta expirada"}
 
-    # ----------------------------------------------------------
-    # 2) Verificar estado de tarjeta
-    # ----------------------------------------------------------
-    if card["status"] != "active":
-        return {"approved": False, "message": "Tarjeta bloqueada"}
+        if tarjeta["status"] == "blocked":
+            return {"approved": False, "message": "Tarjeta bloqueada"}
 
-    # ----------------------------------------------------------
-    # 3) Validación CORRECTA de fecha de expiración
-    # ----------------------------------------------------------
-    exp_mm_req = int(tarjeta["exp_mm"])
-    exp_yy_req = int(tarjeta["exp_yy"])
+        if tarjeta["balance_cents"] < amount:
+            return {"approved": False, "message": "Fondos insuficientes"}
 
-    exp_mm_db = int(card["exp_mm"])
-    exp_yy_db = int(card["exp_yy"])
+        nuevo_saldo = tarjeta["balance_cents"] - amount
+        cursor.execute(
+            "UPDATE cards SET balance_cents = %s WHERE id = %s",
+            (nuevo_saldo, tarjeta["id"])
+        )
 
-    if exp_mm_req != exp_mm_db or exp_yy_req != exp_yy_db:
-        return {"approved": False, "message": "Tarjeta expirada"}
+        auth_code = str(uuid.uuid4())[:8].upper()
 
-    # ----------------------------------------------------------
-    # 4) Verificar fondos disponibles
-    # ----------------------------------------------------------
-    if card["balance_cents"] < amount:
-        return {"approved": False, "message": "Fondos insuficientes"}
+        cursor.execute("""
+            INSERT INTO authorizations (card_id, amount_cents, auth_code)
+            VALUES (%s, %s, %s)
+        """, (tarjeta["id"], amount, auth_code))
 
-    # ----------------------------------------------------------
-    # 5) Descontar saldo si la transacción es válida
-    # ----------------------------------------------------------
-    nuevo_saldo = card["balance_cents"] - amount
-    cursor.execute(
-        "UPDATE cards SET balance_cents=%s WHERE id=%s",
-        (nuevo_saldo, card["id"])
-    )
+        conn.commit()
 
-    # ----------------------------------------------------------
-    # 6) Registrar autorización
-    # ----------------------------------------------------------
-    auth_code = generar_codigo()
-    cursor.execute(
-        "INSERT INTO authorizations (card_id, amount_cents, auth_code) VALUES (%s, %s, %s)",
-        (card["id"], amount, auth_code)
-    )
+        return {
+            "approved": True,
+            "auth_code": auth_code,
+            "message": "Pago aprobado"
+        }
 
-    db.commit()
-
-    return {
-        "approved": True,
-        "auth_code": auth_code,
-        "message": "Pago aprobado"
-    }
+    except Exception as e:
+        return {
+            "approved": False,
+            "message": "Error interno en servicio de pago",
+            "error": str(e)
+        }
