@@ -14,6 +14,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MaestroController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\EstructuraController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,6 +37,10 @@ Route::post('/test/crear-curso', [TestController::class, 'testCrearCurso']);
 // Lista de cursos (público)
 Route::get('/cursos', [CursoController::class, 'index']);
 
+// Estructura de módulos y lecciones de un curso
+Route::get('/cursos/{id}/estructura', [EstructuraController::class, 'show']);
+Route::post('/cursos/{id}/estructura', [EstructuraController::class, 'storeOrUpdate']);
+
 // Autenticación
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
@@ -45,6 +50,13 @@ Route::post('/auth/register', [AuthController::class, 'register']);
 // ======================================================
 // === RUTAS PROTEGIDAS — SOLO USUARIOS AUTENTICADOS ====
 // ======================================================
+
+// === PROGRESO DE ESTUDIANTE EN CURSO ===
+// Obtener progreso de un estudiante en un curso (por inscripcion)
+Route::middleware(['simple_auth'])->get('/progresos/{inscripcionId}', [\App\Http\Controllers\ProgresoController::class, 'show']);
+// Guardar o actualizar progreso de un estudiante en un curso
+Route::middleware(['simple_auth'])->put('/progresos/{inscripcionId}', [\App\Http\Controllers\ProgresoController::class, 'update']);
+
 Route::middleware(['simple_auth'])->group(function () {
 
     // --- Autenticación ---
@@ -63,6 +75,7 @@ Route::middleware(['simple_auth'])->group(function () {
     
     // --- Pagos (estudiantes) ---
     Route::post('/pagos/autorizar', [PagoController::class, 'autorizar']);
+    Route::get('/pagos/recibo/{pago_id}', [PagoController::class, 'recibo']);
     Route::get('/pagos/mis-pagos', [PagoController::class, 'misPagos']); // ← MOVIDO AQUÍ
 
     // --- Certificados ---
@@ -86,6 +99,17 @@ Route::middleware(['simple_auth'])->group(function () {
     Route::get('/inscripciones/{id}', [InscripcionController::class, 'detalles']);
     Route::post('/inscripciones', [InscripcionController::class, 'store']);
     Route::get('/inscripciones', [InscripcionController::class, 'index']);
+
+
+
+    // Cursos (ruta alternativa para maestros)
+    Route::post('/maestros/cursos', [CursoController::class, 'store']);
+
+    // Obtener cursos del maestro
+    Route::get('/maestros/{id}/cursos', [MaestroController::class, 'misCursos']);
+
+    // Buscar estudiantes (maestros)
+    Route::get('/maestros/estudiantes/buscar', [MaestroController::class, 'buscarEstudiantes']);
 
     // Pagos
     Route::post('/pagos/autorizar', [PagoController::class, 'autorizar']);
