@@ -80,9 +80,13 @@
 </template>
 
 <script setup lang="ts">
+
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 
+
+const router = useRouter()
 const maestros = ref<any[]>([])
 const loading = ref(true)
 
