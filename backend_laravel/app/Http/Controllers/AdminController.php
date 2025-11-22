@@ -10,6 +10,31 @@ use App\Models\Maestro;
 
 class AdminController extends Controller
 {
+    // Listar solo los maestros
+    public function getMaestros()
+    {
+        $maestros = \App\Models\Maestro::select('id', 'nombre', 'correo', 'especialidad', 'created_at')
+            ->get()
+            ->map(function ($maestro) {
+                $maestro->tipo = 'maestro';
+                $maestro->role = 'maestro';
+                return $maestro;
+            });
+        return response()->json($maestros);
+    }
+
+    // Listar solo los estudiantes
+    public function getEstudiantes()
+    {
+        $estudiantes = \App\Models\Estudiante::select('id', 'nombre', 'correo', 'created_at')
+            ->get()
+            ->map(function ($estudiante) {
+                $estudiante->tipo = 'estudiante';
+                $estudiante->role = 'estudiante';
+                return $estudiante;
+            });
+        return response()->json($estudiantes);
+    }
     // Listar todos los usuarios
     public function getUsuarios()
     {

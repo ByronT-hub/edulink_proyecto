@@ -162,13 +162,37 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         $user = $request->user();
+        $role = $request->get('auth_role');
 
-        return response()->json([
-            'id' => $user->id,
-            'nombre' => $user->nombre ?? $user->name,
-            'correo' => $user->correo ?? $user->email,
-            'role' => $user->role ?? 'estudiante'
-        ]);
+        // Responder con todos los datos relevantes según el rol
+        if ($role === 'maestro') {
+            return response()->json([
+                'id' => $user->id,
+                'nombre' => $user->nombre,
+                'correo' => $user->correo,
+                'role' => 'maestro',
+                'especialidad' => $user->especialidad ?? null,
+                'biografia' => $user->biografia ?? null,
+                'telefono' => $user->telefono ?? null
+            ]);
+        } elseif ($role === 'estudiante') {
+            return response()->json([
+                'id' => $user->id,
+                'nombre' => $user->nombre,
+                'correo' => $user->correo,
+                'role' => 'estudiante',
+                'carnet' => $user->carnet ?? null,
+                'telefono' => $user->telefono ?? null,
+                'carrera' => $user->carrera ?? null
+            ]);
+        } else { // admin u otro
+            return response()->json([
+                'id' => $user->id,
+                'nombre' => $user->name,
+                'correo' => $user->email,
+                'role' => $user->role ?? 'admin'
+            ]);
+        }
     }
 
     /**

@@ -5,8 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Curso;
 use Illuminate\Http\Request;
 
+
 class CursoController extends Controller
 {
+
+    /**
+     * Listar cursos por maestro (solo admin)
+     */
+    public function cursosPorMaestro($maestro_id)
+    {
+        $cursos = Curso::where('maestro_id', $maestro_id)->get();
+        return response()->json($cursos);
+    }
     /**
      * Listar cursos activos (público)
      */

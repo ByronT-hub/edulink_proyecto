@@ -127,6 +127,12 @@ Route::middleware(['simple_auth'])->group(function () {
 // === RUTAS DE ADMINISTRADOR (solo admin) ==============
 // ======================================================
 Route::middleware(['role:admin'])->group(function () {
+        // Listar cursos por maestro
+        Route::get('/admin/cursos/maestro/{maestro_id}', [CursoController::class, 'cursosPorMaestro']);
+    // Listar solo maestros
+    Route::get('/admin/maestros', [AdminController::class, 'getMaestros']);
+    // Listar solo estudiantes
+    Route::get('/admin/estudiantes', [AdminController::class, 'getEstudiantes']);
 
     // Gestión de usuarios
     Route::get('/admin/usuarios', [AdminController::class, 'getUsuarios']);
