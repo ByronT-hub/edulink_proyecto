@@ -179,6 +179,7 @@ const totalInvertido = computed(() =>
   }, 0).toFixed(2)
 )
 
+
 const estadoClass = (estado: string) => {
   switch (estado) {
     case 'pagado':

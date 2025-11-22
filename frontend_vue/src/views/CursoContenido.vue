@@ -5,32 +5,61 @@
         <router-link to="/estudiante/mis-cursos" class="btn btn-back">← Volver a Mis Cursos</router-link>
         <h1>Contenido del Curso</h1>
       </div>
+
       <div v-if="loading" class="loading">Cargando contenido...</div>
       <div v-else-if="error" class="error">{{ error }}</div>
+
       <div v-else>
-        <div v-if="estructura.length === 0" class="empty">Este curso aún no tiene módulos ni lecciones.</div>
+        <div v-if="estructura.length === 0" class="empty">
+          Este curso aún no tiene módulos ni lecciones.
+        </div>
+
         <div v-else>
+          <!-- BARRA DE PROGRESO -->
           <div class="progress-bar-container" v-if="estructura.length > 0">
             <div class="progress-label">Progreso: {{ porcentaje }}%</div>
             <div class="progress-bar-bg">
               <div class="progress-bar-fill" :style="{ width: porcentaje + '%' }"></div>
             </div>
           </div>
+
+          <!-- BOTÓN COMPLETAR CURSO -->
+          <div v-if="porcentaje === 100" style="text-align:center; margin-bottom:1.5rem;">
+            <button
+              @click="completarCurso"
+              style="
+                background:#3a6f66;
+                color:white;
+                padding:0.7rem 1.5rem;
+                border-radius:10px;
+                font-weight:600;
+                border:none;
+                cursor:pointer;
+                box-shadow:0 4px 10px rgba(0,0,0,0.15);
+              "
+            >
+              ✔ Completar Curso
+            </button>
+          </div>
+
+          <!-- LISTA DE MÓDULOS -->
           <div v-for="(modulo, mIdx) in estructura" :key="mIdx" class="modulo-card">
             <h2>{{ modulo.nombre }}</h2>
             <ul>
               <li v-for="(leccion, lIdx) in modulo.lecciones" :key="lIdx">
                 <label class="leccion-checkbox">
-                  <input type="checkbox"
-                         :value="leccionId(mIdx, lIdx)"
-                         v-model="leccionesCompletadas"
-                         @change="guardarProgreso"
+                  <input
+                    type="checkbox"
+                    :value="leccionId(mIdx, lIdx)"
+                    v-model="leccionesCompletadas"
+                    @change="guardarProgreso"
                   />
                   <span>{{ leccion.nombre }}</span>
                 </label>
               </li>
             </ul>
           </div>
+
         </div>
       </div>
     </div>
@@ -38,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStudentStore, useEnrollmentStore, useProgressStore } from '@/stores'
 
@@ -57,11 +86,14 @@ const leccionesCompletadas = ref<number[]>([])
 const porcentaje = ref(0)
 let inscripcionId: number | null = null
 
-// Utilidad para asignar un ID único a cada lección (por índice)
+// ID único para cada lección
 const leccionId = (mIdx: number, lIdx: number) => mIdx * 1000 + lIdx
 
 const calcularPorcentaje = () => {
-  const total = estructura.value.reduce((acc, m) => acc + (m.lecciones?.length || 0), 0)
+  const total = estructura.value.reduce(
+    (acc, m) => acc + (m.lecciones?.length || 0),
+    0
+  )
   if (total === 0) return 0
   return Math.round((leccionesCompletadas.value.length / total) * 100)
 }
@@ -82,28 +114,53 @@ const cargarEstructura = async () => {
 }
 
 const cargarInscripcionYProgreso = async () => {
-  // Buscar la inscripción del estudiante para este curso
   await enrollmentStore.fetchEnrollments()
+
   const student = studentStore.student
   if (!student) return
-  const inscripcion = enrollmentStore.enrollments.find(e => e.curso_id === cursoId && e.estudiante_id === student.id)
+
+  const inscripcion = enrollmentStore.enrollments.find(
+    e => e.curso_id === cursoId && e.estudiante_id === student.id
+  )
+
   if (!inscripcion) return
+
   inscripcionId = inscripcion.id
-  // Cargar progreso
+
   await progressStore.fetchProgress(inscripcionId)
+
   if (progressStore.progress) {
     leccionesCompletadas.value = progressStore.progress.lecciones_completadas || []
-    porcentaje.value = progressStore.progress.porcentaje || 0
   } else {
     leccionesCompletadas.value = []
-    porcentaje.value = 0
   }
+  porcentaje.value = calcularPorcentaje()
 }
 
 const guardarProgreso = async () => {
   if (!inscripcionId) return
+  // La barra ya se actualiza por el watcher, solo guardar en backend
+  try {
+    await progressStore.updateProgress(
+      inscripcionId,
+      leccionesCompletadas.value,
+      porcentaje.value
+    )
+  } catch (e) {
+    // Si falla, recargar progreso desde backend
+    await cargarInscripcionYProgreso()
+  }
+}
+
+// Hacer la barra reactiva: recalcula porcentaje cada vez que cambian los checkboxes
+watch(leccionesCompletadas, () => {
   porcentaje.value = calcularPorcentaje()
-  await progressStore.updateProgress(inscripcionId, leccionesCompletadas.value, porcentaje.value)
+})
+
+
+// NUEVA FUNCIÓN
+const completarCurso = () => {
+  alert("Curso completado 🎉 (Aquí puedes generar el certificado o cambiar el estado)")
 }
 
 onMounted(async () => {

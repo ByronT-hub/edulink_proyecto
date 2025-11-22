@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import pinia from './stores'
 import './style.css'
 import App from './App.vue'
+import { useAuthStore } from './stores/auth'
 
 // Importar componentes para las rutas
 import Home from './views/Home.vue'
@@ -55,23 +56,31 @@ const router = createRouter({
 })
 
 // Guard para rutas protegidas
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
   const requiresRole = to.matched.find(record => record.meta.requiresRole)?.meta.requiresRole
-  const isAuthenticated = localStorage.getItem('edulink_token')
-  
-  if (requiresAuth && !isAuthenticated) {
-    next('/login')
-  } else if (requiresRole) {
-    // Verificar rol del usuario
-    const userRole = JSON.parse(localStorage.getItem('edulink_user') || '{}')?.role
-    if (userRole !== requiresRole) {
-      next('/dashboard') // Redirigir al dashboard si no tiene el rol correcto
-    } else {
-      next()
+  const authStore = useAuthStore()
+
+  // Inicializar desde localStorage si es necesario
+  if (!authStore.token) {
+    authStore.initializeFromStorage()
+  }
+
+  if (requiresAuth) {
+    // Validar token con backend
+    const valid = await authStore.getCurrentUser()
+    if (!valid) {
+      await authStore.logout()
+      return next('/')
     }
+    if (requiresRole) {
+      if (!authStore.user || authStore.user.role !== requiresRole) {
+        return next('/dashboard')
+      }
+    }
+    return next()
   } else {
-    next()
+    return next()
   }
 })
 

@@ -64,8 +64,17 @@ const handleLogout = async () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
   authStore.initializeFromStorage()
+  // Validar sesión con backend
+  if (authStore.token) {
+    const valid = await authStore.getCurrentUser()
+    if (!valid) {
+      // Token inválido o backend caído
+      await authStore.logout()
+      router.push('/login')
+    }
+  }
 })
 </script>
 
