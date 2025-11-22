@@ -28,19 +28,26 @@ class CursoController extends Controller
     }
 
     /**
-     * Crear nuevo curso (solo admin)
+     * Crear nuevo curso (maestro)
      */
     public function store(Request $request)
     {
         $data = $request->validate([
             'titulo' => 'required|string|max:255',
-            'descripcion' => 'nullable|string',
-            'costo_centavos' => 'required|integer|min:0',
-            'fecha_inicio' => 'nullable|date',
-            'fecha_fin' => 'nullable|date|after_or_equal:fecha_inicio',
+            'descripcion' => 'required|string',
+            'precio' => 'required|numeric|min:0',
+            'duracion' => 'required|integer|min:1',
+            'categoria' => 'nullable|string|max:100',
+            'nivel' => 'nullable|string|max:50',
+            'requisitos' => 'nullable|string',
         ]);
 
-        $curso = Curso::create($data);
+        // Asignar el maestro_id desde el usuario autenticado
+        $user = $request->user();
+        $data['maestro_id'] = $user ? $user->id : null;
+        $data['activo'] = true;
+
+        $curso = \App\Models\Curso::create($data);
 
         return response()->json($curso, 201);
     }

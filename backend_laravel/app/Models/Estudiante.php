@@ -16,7 +16,7 @@ class Estudiante extends Authenticatable
         'correo',
         'contrasena',
         'telefono',
-        'carnet'
+        'carnet',
     ];
 
     protected $hidden = ['contrasena'];

@@ -131,8 +131,20 @@ Route::middleware(['role:admin'])->group(function () {
         Route::get('/admin/cursos/maestro/{maestro_id}', [CursoController::class, 'cursosPorMaestro']);
     // Listar solo maestros
     Route::get('/admin/maestros', [AdminController::class, 'getMaestros']);
+    // Editar maestro
+    Route::put('/admin/maestros/{id}', [AdminController::class, 'updateMaestro']);
+    // Eliminar maestro
+    Route::delete('/admin/maestros/{id}', function($id) {
+        return app(\App\Http\Controllers\AdminController::class)->eliminarUsuario('maestro', $id);
+    });
     // Listar solo estudiantes
     Route::get('/admin/estudiantes', [AdminController::class, 'getEstudiantes']);
+    // Editar estudiante
+    Route::put('/admin/estudiantes/{id}', [AdminController::class, 'updateEstudiante']);
+    // Eliminar estudiante
+    Route::delete('/admin/estudiantes/{id}', function($id) {
+        return app(\App\Http\Controllers\AdminController::class)->eliminarUsuario('estudiante', $id);
+    });
 
     // Gestión de usuarios
     Route::get('/admin/usuarios', [AdminController::class, 'getUsuarios']);

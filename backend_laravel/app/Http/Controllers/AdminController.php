@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Maestro;
+use App\Models\Estudiante;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
-use App\Models\Estudiante;
-use App\Models\Maestro;
 
 class AdminController extends Controller
 {
     // Listar solo los maestros
     public function getMaestros()
     {
-        $maestros = \App\Models\Maestro::select('id', 'nombre', 'correo', 'especialidad', 'created_at')
+        $maestros = \App\Models\Maestro::select('id', 'nombre', 'correo', 'especialidad', 'telefono', 'biografia', 'created_at')
             ->get()
             ->map(function ($maestro) {
                 $maestro->tipo = 'maestro';
@@ -26,7 +26,7 @@ class AdminController extends Controller
     // Listar solo los estudiantes
     public function getEstudiantes()
     {
-        $estudiantes = \App\Models\Estudiante::select('id', 'nombre', 'correo', 'created_at')
+        $estudiantes = \App\Models\Estudiante::select('id', 'nombre', 'correo', 'telefono', 'carrera', 'universidad', 'nivel_estudio', 'intereses', 'created_at')
             ->get()
             ->map(function ($estudiante) {
                 $estudiante->tipo = 'estudiante';
@@ -140,11 +140,12 @@ class AdminController extends Controller
         ], 201);
     }
     
+    // Editar maestro
+
     // Eliminar usuario
     public function eliminarUsuario($tipo, $id)
     {
         $usuario = null;
-        
         switch ($tipo) {
             case 'admin':
                 $usuario = User::find($id);
@@ -156,13 +157,10 @@ class AdminController extends Controller
                 $usuario = Maestro::find($id);
                 break;
         }
-        
         if (!$usuario) {
             return response()->json(['message' => 'Usuario no encontrado'], 404);
         }
-        
         $usuario->delete();
-        
         return response()->json([
             'message' => 'Usuario eliminado exitosamente'
         ]);

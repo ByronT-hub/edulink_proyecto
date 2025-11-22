@@ -12,10 +12,6 @@ class Maestro extends Model
         'correo',
         'contrasena',
         'especialidad',
-        'biografia',
-        'telefono',
-        'activo',
-        'remember_token'
     ];
 
     protected $hidden = [
