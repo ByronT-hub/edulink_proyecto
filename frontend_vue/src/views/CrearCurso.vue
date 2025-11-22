@@ -175,67 +175,128 @@ const cancelar = () => {
 </script>
 
 <style scoped>
+/* ===========================
+   PALETA & BASE (branding EduLink)
+   =========================== */
 .crear-curso {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-  padding: 2rem 0;
+  --emerald-primary: #4f9085;
+  --emerald-dark: #3a6f66;
+  --emerald-soft: #e4f1ed;
+  --neutral-background: #f6f8fa;
+  --neutral-dark: #23313f;
+  --accent-highlight: #a3d8c3;
+  --border-radius-primary: 20px;
+
+  min-height: calc(100vh - 80px);
+  padding: 3rem 0 3.5rem;
+  background:
+    radial-gradient(circle at top left, #eaf6f3 0, #d7ece6 40%, #c7e2dc 75%, #b9d8d2 100%);
+  font-family: 'Poppins', 'Roboto', 'Arial', sans-serif;
 }
 
 .container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 2rem;
 }
 
+/* ===========================
+   HEADER
+   =========================== */
 .header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2.4rem;
 }
 
 .header h1 {
-  color: #2d3748;
+  color: #12222b;
   margin-bottom: 0.5rem;
+  font-size: 2rem;
+  letter-spacing: 0.03em;
 }
 
 .header p {
-  color: #718096;
+  color: #6d7a86;
   margin-bottom: 1rem;
+  font-size: 0.98rem;
 }
 
+/* Botón volver */
 .btn-back {
-  display: inline-block;
-  padding: 0.5rem 1rem;
-  background: #e2e8f0;
-  color: #2d3748;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.55rem 1.1rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--emerald-dark);
   text-decoration: none;
-  border-radius: 8px;
-  transition: all 0.3s ease;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow:
+    0 12px 28px rgba(15, 35, 34, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(163, 216, 195, 0.7);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .btn-back:hover {
-  background: #cbd5e0;
+  background: var(--emerald-soft);
+  border-color: var(--emerald-primary);
+  transform: translateY(-1px);
 }
 
+/* ===========================
+   CONTENEDOR DEL FORMULARIO
+   =========================== */
 .form-container {
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.97);
+  border-radius: 26px;
+  padding: 2.2rem 2rem;
+  box-shadow:
+    0 26px 70px rgba(15, 35, 34, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(163, 216, 195, 0.7);
 }
 
+.curso-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ===========================
+   SECCIONES DEL FORM
+   =========================== */
 .form-section {
-  margin-bottom: 2rem;
+  padding: 1.4rem 1.3rem 1.5rem;
+  border-radius: 20px;
+  background: #f7fafb;
+  border: 1px solid rgba(163, 216, 195, 0.6);
+  box-shadow: 0 14px 36px rgba(15, 35, 34, 0.16);
 }
 
 .form-section h3 {
-  color: #2d3748;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #e2e8f0;
+  color: #12222b;
+  margin-bottom: 1.2rem;
+  font-size: 1.1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid rgba(163, 216, 195, 0.8);
 }
 
+/* ===========================
+   CAMPOS
+   =========================== */
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.3rem;
 }
 
 .form-row {
@@ -246,77 +307,141 @@ const cancelar = () => {
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   font-weight: 600;
-  color: #2d3748;
+  color: #23313f;
+  font-size: 0.9rem;
 }
 
 .form-group input,
 .form-group textarea,
 .form-group select {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.3s ease;
+  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid #dde3ea;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  background: #ffffff;
+  color: #2f3c49;
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease;
 }
 
+.form-group textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #9aa7b2;
+}
+
+/* Focus */
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #4299e1;
-  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+  border-color: var(--emerald-primary);
+  box-shadow: 0 0 0 3px rgba(79, 144, 133, 0.18);
+  background: #ffffff;
 }
 
+/* ===========================
+   ACCIONES
+   =========================== */
 .form-actions {
   display: flex;
   gap: 1rem;
   justify-content: flex-end;
-  margin-top: 2rem;
+  margin-top: 0.5rem;
 }
 
+/* Botones base */
 .btn {
-  padding: 0.75rem 1.5rem;
+  padding: 0.8rem 1.6rem;
+  border-radius: 999px;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease,
+    color 0.22s ease,
+    border-color 0.22s ease;
 }
 
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
+/* Primario (CTA crear curso) */
 .btn-primary {
-  background: #4299e1;
-  color: white;
+  background: var(--emerald-dark);
+  color: #ffffff;
+  box-shadow: 0 14px 32px rgba(8, 32, 26, 0.55);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #3182ce;
+  background: var(--emerald-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 18px 40px rgba(5, 22, 18, 0.65);
 }
 
+/* Secundario (cancelar) */
 .btn-secondary {
-  background: #e2e8f0;
-  color: #2d3748;
+  background: #ecf1f5;
+  color: #23313f;
+  border: 1px solid rgba(163, 216, 195, 0.7);
+  box-shadow: 0 10px 24px rgba(15, 35, 34, 0.18);
 }
 
 .btn-secondary:hover {
-  background: #cbd5e0;
+  background: #dde6ec;
+  transform: translateY(-1px);
 }
 
+/* ===========================
+   RESPONSIVE
+   =========================== */
 @media (max-width: 768px) {
+  .container {
+    padding: 0 1.4rem;
+  }
+
+  .form-container {
+    padding: 1.7rem 1.4rem;
+  }
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .form-actions {
-    flex-direction: column;
+    flex-direction: column-reverse;
+  }
+
+  .btn {
+    width: 100%;
+  }
+
+  .header h1 {
+    font-size: 1.7rem;
   }
 }
 </style>

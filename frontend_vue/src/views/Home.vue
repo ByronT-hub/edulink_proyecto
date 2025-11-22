@@ -2,22 +2,28 @@
   <div class="home">
     <section class="hero">
       <div class="hero-content">
-        <h1 class="hero-title">Bienvenido a EduLink</h1>
-        <p class="hero-subtitle">
-          La plataforma líder en educación online con certificaciones verificables
-        </p>
-        <div class="hero-actions">
-          <router-link to="/courses" class="btn btn-primary btn-large">
-            Explorar Cursos
-          </router-link>
-          <router-link v-if="!isAuthenticated" to="/register" class="btn btn-outline btn-large">
-            Registrarse Gratis
-          </router-link>
+        <div class="hero-text">
+          <h1 class="hero-title">Bienvenido a EduLink</h1>
+          <p class="hero-subtitle">
+            La plataforma líder en educación online con certificaciones verificables
+          </p>
+          <div class="hero-actions">
+            <router-link to="/courses" class="btn btn-primary btn-large">
+              Explorar Cursos
+            </router-link>
+            <router-link
+              v-if="!isAuthenticated"
+              to="/register"
+              class="btn btn-outline btn-large"
+            >
+              Registrarse Gratis
+            </router-link>
+          </div>
         </div>
-      </div>
-      <div class="hero-image">
-        <div class="hero-illustration">
-          📚
+        <div class="hero-image">
+          <div class="hero-illustration">
+            📚
+          </div>
         </div>
       </div>
     </section>
@@ -104,86 +110,116 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* Paleta de Colores Esmeralda Sutil y Apagado */
-:root {
-  /* Verde Esmeralda sutil, tirando más a un verde grisáceo o bosque claro */
-  --emerald-primary: #558B84; 
-  /* Tono más oscuro para hover y botones principales */
-  --emerald-dark: #3E6C66;     
-  /* Fondo muy claro, casi blanco */
-  --neutral-background: #F8F9FB; 
-  /* Texto principal/fondo oscuro (azul medianoche) */
-  --neutral-dark: #34495e;     
-  /* Acento muy claro y suave */
-  --accent-highlight: #A3D8C3; 
-  --border-radius-primary: 16px; 
-}
-
-/* --- ESTILO GLOBAL DE FUENTE --- */
+/* ===========================
+   PALETA & BASE DE DISEÑO
+   =========================== */
 .home {
-  width: 100%;
-  font-family: 'Poppins', 'Roboto', 'Arial', sans-serif; 
+  /* Paleta esmeralda suave */
+  --emerald-primary: #4f9085;      /* Verde esmeralda sutil */
+  --emerald-dark: #3a6f66;         /* Versión más profunda para botones */
+  --emerald-soft: #e4f1ed;         /* Fondo muy suave */
+  --neutral-background: #f6f8fa;   /* Fondo general */
+  --neutral-dark: #23313f;         /* Texto principal */
+  --accent-highlight: #a3d8c3;     /* Acento claro */
+  --border-radius-primary: 18px;
+
+  min-height: 100vh;
+  background: var(--neutral-background);
+  font-family: 'Poppins', 'Roboto', 'Arial', sans-serif;
+  color: var(--neutral-dark);
 }
 
-/* --- TIPOGRAFÍA DE ENCABEZADOS Y TITULOS --- */
-.hero-title, .section-title, .cta-content h2 {
-  font-weight: 700; 
-}
-
-/* --- SECCIÓN HERO (Banner Principal) --- */
+/* ===========================
+   HERO (full height elegante)
+   =========================== */
 .hero {
-  /* Aplicación de la paleta sutil */
-  background: linear-gradient(135deg, var(--emerald-primary) 0%, #7CB8B0 100%);
-  color: white;
-  padding: 4rem 0;
+  position: relative;
+  background: radial-gradient(circle at top left, #eaf6f3 0, #d7ece6 40%, #c7e2dc 75%, #b9d8d2 100%);
+  padding: 5rem 0 4rem;
+  min-height: calc(100vh - 80px); /* casi pantalla completa, dejando espacio por si hay navbar */
   display: flex;
   align-items: center;
-  min-height: 500px;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 10% 20%, rgba(79, 144, 133, 0.18), transparent 55%),
+              radial-gradient(circle at 80% 80%, rgba(163, 216, 195, 0.35), transparent 60%);
+  opacity: 0.9;
+  pointer-events: none;
 }
 
 .hero-content {
+  position: relative; /* para estar encima del overlay */
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 3.5rem;
   align-items: center;
 }
 
+.hero-text {
+  max-width: 620px;
+}
+
 .hero-title {
-  font-size: 3.2rem; 
+  font-size: 3.1rem;
+  line-height: 1.15;
   margin-bottom: 1rem;
-  line-height: 1.2;
+  color: #12222b;
+  letter-spacing: 0.02em;
 }
 
 .hero-subtitle {
-  font-size: 1.35rem; 
-  margin-bottom: 2rem;
+  font-size: 1.2rem;
+  margin-bottom: 2.3rem;
   opacity: 0.9;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .hero-actions {
   display: flex;
-  gap: 1rem;
   flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* Tarjeta/ilustración del lado derecho */
+.hero-image {
+  display: flex;
+  justify-content: center;
 }
 
 .hero-illustration {
-  font-size: 10rem;
-  text-align: center;
+  width: 260px;
+  height: 260px;
+  border-radius: 28px;
+  background: linear-gradient(145deg, rgba(79, 144, 133, 0.15), rgba(255, 255, 255, 0.9));
+  box-shadow:
+    0 22px 60px rgba(15, 35, 34, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5rem;
 }
 
+/* Tamaño botones hero */
 .btn-large {
-  padding: 1rem 2rem;
-  font-size: 1.1rem;
+  padding: 0.95rem 2.2rem;
+  font-size: 1.02rem;
 }
 
-/* --- SECCIÓN FEATURES (Características) --- */
+/* ===========================
+   FEATURES (cards elegantes)
+   =========================== */
 .features {
-  padding: 6rem 0; 
-  background: var(--neutral-background); /* Fondo extra claro */
+  padding: 5.5rem 0 5rem;
+  background: var(--neutral-background);
 }
 
 .container {
@@ -194,165 +230,238 @@ onMounted(async () => {
 
 .section-title {
   text-align: center;
-  font-size: 2.8rem; 
-  margin-bottom: 4rem; 
-  color: var(--neutral-dark); /* Texto oscuro */
+  font-size: 2.4rem;
+  margin-bottom: 3.5rem;
+  color: #1c2936;
+  letter-spacing: 0.03em;
 }
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2.5rem; 
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2.3rem;
 }
 
 .feature-card {
-  background: white;
-  padding: 2.5rem; 
-  border-radius: var(--border-radius-primary); 
-  text-align: center;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); 
-  /* Línea de acento muy sutil */
-  border-bottom: 4px solid var(--accent-highlight); 
-  transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+  background: #ffffff;
+  padding: 2.2rem 2rem;
+  border-radius: var(--border-radius-primary);
+  text-align: left;
+  box-shadow: 0 16px 40px rgba(15, 35, 34, 0.07);
+  border: 1px solid rgba(163, 216, 195, 0.5);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(79, 144, 133, 0.06), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
 }
 
 .feature-card:hover {
-  transform: translateY(-7px); 
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
-  border-color: var(--emerald-primary); /* El hover trae el color principal */
+  transform: translateY(-6px);
+  box-shadow: 0 20px 45px rgba(8, 32, 26, 0.18);
+  border-color: var(--emerald-primary);
+}
+
+.feature-card:hover::before {
+  opacity: 1;
 }
 
 .feature-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  color: var(--emerald-primary); /* Iconos con el tono principal sutil */
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--emerald-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: var(--emerald-dark);
+  margin-bottom: 1.4rem;
 }
 
 .feature-card h3 {
-  font-size: 1.6rem; 
-  margin-bottom: 1rem;
-  color: var(--neutral-dark);
+  font-size: 1.4rem;
+  margin-bottom: 0.8rem;
+  color: #1f2e3a;
 }
 
 .feature-card p {
-  color: #6c757d;
-  line-height: 1.7; 
+  color: #6d7a86;
+  line-height: 1.7;
+  font-size: 0.98rem;
 }
 
-/* --- SECCIÓN STATS (Estadísticas) --- */
+/* ===========================
+   STATS (bloque contrastado)
+   =========================== */
 .stats {
-  padding: 6rem 0;
-  background: var(--neutral-dark); /* Fondo oscuro (azul medianoche) */
-  color: white;
+  padding: 5rem 0;
+  background: radial-gradient(circle at top, #2c3e50 0, #182531 55%, #101820 100%);
+  color: #f9fbff;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 2rem;
+  align-items: stretch;
 }
 
 .stat-item {
   text-align: center;
+  padding: 1.8rem 1.2rem;
+  border-radius: 18px;
+  background: rgba(10, 23, 30, 0.75);
+  border: 1px solid rgba(163, 216, 195, 0.4);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
 }
 
 .stat-number {
-  font-size: 3.5rem; 
+  font-size: 2.8rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
-  color: var(--accent-highlight); /* Acento muy claro y sutil */
+  margin-bottom: 0.4rem;
+  color: var(--accent-highlight);
 }
 
 .stat-label {
-  font-size: 1.2rem;
+  font-size: 1.02rem;
   opacity: 0.9;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-/* --- SECCIÓN CTA (Llamada a la Acción) --- */
+/* ===========================
+   CTA (llamada a la acción)
+   =========================== */
 .cta {
-  padding: 6rem 0;
-  background: var(--emerald-primary); /* El CTA usa el color principal sutil */
-  color: white;
+  padding: 5rem 0 5.5rem;
+  background: linear-gradient(135deg, var(--emerald-dark), var(--emerald-primary));
+  color: #ffffff;
 }
 
 .cta-content {
   text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
 }
 
 .cta-content h2 {
-  font-size: 3rem; 
-  margin-bottom: 1rem;
+  font-size: 2.5rem;
+  margin-bottom: 0.9rem;
+  letter-spacing: 0.03em;
 }
 
 .cta-content p {
-  font-size: 1.4rem; 
-  margin-bottom: 2.5rem; 
-  opacity: 0.9;
+  font-size: 1.1rem;
+  margin-bottom: 2.2rem;
+  opacity: 0.95;
 }
 
-/* --- ESTILOS DE BOTONES --- */
+/* ===========================
+   BOTONES
+   =========================== */
 .btn {
-  padding: 0.8rem 1.8rem; 
-  border: none;
-  border-radius: 50px; /* Estilo píldora */
+  padding: 0.8rem 1.9rem;
+  border-radius: 999px;
   text-decoration: none;
   cursor: pointer;
-  font-size: 1.1rem;
-  transition: all 0.3s;
-  display: inline-block;
-  text-align: center;
-  font-weight: 600; 
+  font-size: 0.98rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease, color 0.22s ease,
+    border-color 0.22s ease;
 }
 
 .btn-primary {
-  background: var(--emerald-dark); /* Botón principal más oscuro para buen contraste */
-  color: white;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); 
+  background: var(--emerald-dark);
+  color: #ffffff;
+  box-shadow: 0 10px 25px rgba(16, 52, 46, 0.35);
 }
 
 .btn-primary:hover {
-  background: var(--emerald-primary); /* Se aclara ligeramente en hover */
-  transform: translateY(-3px); 
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  background: var(--emerald-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 35px rgba(8, 32, 26, 0.45);
 }
 
 .btn-outline {
   background: transparent;
-  color: white;
-  border: 2px solid white;
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
 }
 
 .btn-outline:hover {
-  background: white;
-  color: var(--emerald-dark); 
+  background: #ffffff;
+  color: var(--emerald-dark);
+  transform: translateY(-2px);
 }
 
-/* --- MEDIA QUERIES (Responsividad) --- */
-@media (max-width: 768px) {
+/* ===========================
+   RESPONSIVE
+   =========================== */
+@media (max-width: 992px) {
   .hero-content {
     grid-template-columns: 1fr;
     text-align: center;
   }
-  
+
+  .hero-text {
+    margin: 0 auto;
+  }
+
+  .hero-image {
+    margin-top: 2.5rem;
+  }
+
+  .hero-illustration {
+    width: 220px;
+    height: 220px;
+    font-size: 4.2rem;
+  }
+
   .hero-title {
     font-size: 2.5rem;
   }
-  
+
   .hero-subtitle {
-    font-size: 1.2rem;
+    font-size: 1.05rem;
   }
-  
+}
+
+@media (max-width: 600px) {
+  .hero {
+    padding: 4rem 0 3rem;
+    min-height: auto;
+  }
+
   .section-title {
-    font-size: 2.2rem;
-    margin-bottom: 3rem;
+    font-size: 2rem;
   }
-  
+
   .cta-content h2 {
-    font-size: 2.2rem;
+    font-size: 2rem;
   }
-  
+
   .cta-content p {
-    font-size: 1.2rem;
+    font-size: 1rem;
+  }
+
+  .btn-large {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

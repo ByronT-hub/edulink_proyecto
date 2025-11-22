@@ -13,6 +13,7 @@ import Dashboard from './views/Dashboard.vue'
 import CourseDetail from './views/CourseDetail.vue'
 import Payment from './views/Payment.vue'
 import Certificates from './views/Certificates.vue'
+import CursoContenido from './views/CursoContenido.vue'
 
 // Vistas específicas del Maestro
 import MisCursos from './views/MisCursos.vue'
@@ -26,6 +27,7 @@ import MiPerfilEstudiante from './views/MiPerfilEstudiante.vue'
 
 // Configurar rutas
 const routes = [
+    { path: '/maestro/agregar-tareas/:id', name: 'agregar-tareas', component: () => import('./views/AgregarTareas.vue'), props: true, meta: { requiresAuth: true, requiresRole: 'maestro' } },
   { path: '/', name: 'home', component: Home },
   { path: '/courses', name: 'courses', component: Courses },
   { path: '/course/:id', name: 'course-detail', component: CourseDetail, props: true },
@@ -34,6 +36,7 @@ const routes = [
   { path: '/dashboard', name: 'dashboard', component: Dashboard, meta: { requiresAuth: true } },
   { path: '/payment/:enrollmentId', name: 'payment', component: Payment, props: true, meta: { requiresAuth: true } },
   { path: '/certificates', name: 'certificates', component: Certificates, meta: { requiresAuth: true } },
+  { path: '/curso/:id/contenido', name: 'curso-contenido', component: CursoContenido, props: true, meta: { requiresAuth: true, requiresRole: 'estudiante' } },
   
   // Rutas específicas del Maestro
   { path: '/maestro/mis-cursos', name: 'mis-cursos', component: MisCursos, meta: { requiresAuth: true, requiresRole: 'maestro' } },

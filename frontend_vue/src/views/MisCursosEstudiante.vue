@@ -215,7 +215,6 @@ const formatearFecha = (fecha: string) => {
 
 const calcularProgreso = (inscripcion: Inscripcion) => {
   // Por ahora retornamos un progreso simulado
-  // En el futuro se puede implementar el tracking real del progreso
   if (inscripcion.estado === 'pagado') {
     return Math.floor(Math.random() * 100)
   }
@@ -255,12 +254,10 @@ const cargarMisCursos = async () => {
 }
 
 const accederCurso = (cursoId: number) => {
-  // Redirigir a la vista del curso o mostrar contenido
   router.push(`/curso/${cursoId}/contenido`)
 }
 
 const verDetalles = (inscripcionId: number) => {
-  // Redirigir a una página de detalles de la inscripción
   router.push(`/inscripcion/${inscripcionId}/detalles`)
 }
 
@@ -271,63 +268,80 @@ onMounted(() => {
 
 <style scoped>
 .mis-cursos-estudiante {
+  --emerald-primary: #4f9085;
+  --emerald-dark: #3a6f66;
+  --emerald-soft: #e4f1ed;
+  --danger: #e05252;
+  --warning: #f7b267;
+
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 2rem 0;
+  padding: 2.5rem 0 3.5rem;
+  background:
+    radial-gradient(circle at top left, #eaf6f3 0, #d7ece6 40%, #c7e2dc 75%, #b9d8d2 100%);
+  font-family: 'Poppins', 'Roboto', 'Arial', sans-serif;
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: 0 2rem;
 }
 
+/* HEADER */
 .header {
   text-align: center;
   margin-bottom: 3rem;
-  color: white;
+  color: #12222b;
 }
 
 .header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  font-size: 2.2rem;
+  margin-bottom: 0.6rem;
+  letter-spacing: 0.04em;
 }
 
 .header p {
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
+  font-size: 0.98rem;
   opacity: 0.9;
+  margin-bottom: 1.1rem;
 }
 
 .btn-back {
   display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
+  padding: 0.65rem 1.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  color: #12222b;
   text-decoration: none;
-  border-radius: 25px;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  font-size: 0.85rem;
+  font-weight: 500;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .btn-back:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(10, 28, 24, 0.35);
 }
 
+/* ESTADOS GENERALES */
 .loading {
   text-align: center;
   padding: 4rem 0;
-  color: white;
+  color: #1f2e3a;
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid rgba(255, 255, 255, 0.3);
-  border-top: 4px solid white;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
+  border: 4px solid rgba(79, 144, 133, 0.2);
+  border-top-color: var(--emerald-dark);
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
 }
@@ -337,261 +351,340 @@ onMounted(() => {
   100% { transform: rotate(360deg); }
 }
 
-.error-state, .empty-state {
+.error-state,
+.empty-state {
   text-align: center;
-  padding: 4rem 0;
+  padding: 3.5rem 0 1rem;
 }
 
-.error-content, .empty-content {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 2rem;
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-  color: white;
-  max-width: 500px;
+.error-content,
+.empty-content {
+  max-width: 520px;
   margin: 0 auto;
+  padding: 2rem 1.8rem;
+  border-radius: 20px;
+  background: rgba(249, 252, 251, 0.96);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(163, 216, 195, 0.9);
+  box-shadow:
+    0 22px 60px rgba(10, 28, 24, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.9);
+  color: #1f2e3a;
 }
 
-.empty-content h2, .error-content h2 {
-  margin-bottom: 1rem;
+.error-content h2,
+.empty-content h2 {
+  margin-bottom: 0.7rem;
+  font-size: 1.4rem;
 }
 
+.error-content p,
+.empty-content p {
+  font-size: 0.95rem;
+  opacity: 0.9;
+  margin-bottom: 1.3rem;
+}
+
+/* GRID DE CURSOS */
 .cursos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 1.9rem;
   margin-bottom: 3rem;
 }
 
 .curso-card {
-  background: white;
-  border-radius: 20px;
-  padding: 2rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease;
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 22px;
+  padding: 1.8rem 1.6rem 1.6rem;
+  box-shadow:
+    0 24px 65px rgba(10, 28, 24, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(175, 219, 203, 0.9);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
 }
 
 .curso-card:hover {
-  transform: translateY(-8px);
+  transform: translateY(-6px);
+  box-shadow:
+    0 30px 80px rgba(5, 15, 13, 0.9),
+    0 0 0 1px rgba(255, 255, 255, 1);
 }
 
 .curso-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1.5rem;
+  gap: 1rem;
+  margin-bottom: 1.3rem;
 }
 
 .curso-info h3 {
-  margin: 0 0 0.5rem;
-  color: #2d3748;
-  font-size: 1.5rem;
+  margin: 0 0 0.4rem;
+  color: #12222b;
+  font-size: 1.25rem;
 }
 
 .maestro {
   margin: 0;
-  color: #718096;
-  font-size: 1rem;
+  color: #60707e;
+  font-size: 0.9rem;
 }
 
+/* BADGES DE ESTADO */
 .estado-badge {
-  padding: 0.5rem 1rem;
-  border-radius: 25px;
-  font-size: 0.875rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
   font-weight: 600;
-  text-align: center;
+  white-space: nowrap;
 }
 
 .estado-badge.success {
-  background: linear-gradient(45deg, #48bb78, #38a169);
-  color: white;
+  background: rgba(79, 144, 133, 0.12);
+  color: var(--emerald-dark);
+  border: 1px solid rgba(79, 144, 133, 0.7);
 }
 
 .estado-badge.warning {
-  background: linear-gradient(45deg, #ed8936, #dd6b20);
-  color: white;
+  background: rgba(247, 178, 103, 0.12);
+  color: #ad651e;
+  border: 1px solid rgba(247, 178, 103, 0.8);
 }
 
 .estado-badge.danger {
-  background: linear-gradient(45deg, #f56565, #e53e3e);
-  color: white;
+  background: rgba(224, 82, 82, 0.09);
+  color: #b02e2e;
+  border: 1px solid rgba(224, 82, 82, 0.85);
 }
 
+.estado-badge.secondary {
+  background: rgba(163, 177, 193, 0.2);
+  color: #435161;
+  border: 1px solid rgba(163, 177, 193, 0.8);
+}
+
+/* CONTENIDO DEL CURSO */
 .descripcion {
-  color: #4a5568;
-  margin-bottom: 1.5rem;
+  color: #4d5a65;
+  margin-bottom: 1.1rem;
+  font-size: 0.9rem;
   line-height: 1.6;
 }
 
 .curso-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
 }
 
 .curso-meta span {
-  font-size: 0.875rem;
-  color: #718096;
-  background: #f7fafc;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
+  font-size: 0.78rem;
+  color: #455463;
+  background: #edf3f1;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
 }
 
+/* PROGRESO */
 .progreso-info {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.1rem;
 }
 
 .progreso-bar {
   width: 100%;
   height: 8px;
-  background: #e2e8f0;
-  border-radius: 4px;
+  border-radius: 999px;
+  background: #e0e7eb;
   overflow: hidden;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
 }
 
 .progreso-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4299e1, #3182ce);
+  background: linear-gradient(90deg, var(--emerald-dark), var(--emerald-primary));
   transition: width 0.3s ease;
 }
 
 .progreso-text {
-  font-size: 0.875rem;
-  color: #718096;
+  font-size: 0.78rem;
+  color: #60707e;
 }
 
+/* PAGO */
 .pago-info {
-  background: linear-gradient(45deg, #f0fff4, #e6fffa);
-  padding: 1rem;
-  border-radius: 12px;
-  margin-bottom: 1.5rem;
-  border-left: 4px solid #48bb78;
+  background: linear-gradient(120deg, #e5f7ef, #f0faf6);
+  border-radius: 14px;
+  padding: 0.75rem 0.9rem;
+  border-left: 4px solid var(--emerald-primary);
+  margin-bottom: 1.25rem;
 }
 
 .pago-detalle {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  font-size: 0.875rem;
+  font-size: 0.8rem;
+  color: #32414d;
 }
 
 .monto {
   font-weight: 600;
-  color: #2d3748;
 }
 
 .fecha {
-  color: #718096;
+  color: #7a8a95;
 }
 
+/* ACCIONES */
 .curso-actions {
   display: flex;
-  gap: 1rem;
+  gap: 0.7rem;
 }
 
 .btn {
-  padding: 0.75rem 1.5rem;
+  flex: 1;
+  padding: 0.7rem 1.4rem;
+  border-radius: 999px;
   border: none;
-  border-radius: 12px;
+  font-size: 0.84rem;
   font-weight: 600;
   cursor: pointer;
-  text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  flex: 1;
-  font-size: 0.875rem;
+  gap: 0.4rem;
+  text-decoration: none;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease;
 }
 
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-primary {
-  background: linear-gradient(45deg, #4299e1, #3182ce);
-  color: white;
+  background: var(--emerald-dark);
+  color: #ffffff;
+  box-shadow: 0 16px 35px rgba(6, 22, 18, 0.7);
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(66, 153, 225, 0.4);
+  background: var(--emerald-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 20px 55px rgba(5, 15, 13, 0.9);
 }
 
 .btn-outline {
   background: transparent;
-  color: #4299e1;
-  border: 2px solid #4299e1;
+  color: var(--emerald-dark);
+  border: 2px solid rgba(79, 144, 133, 0.8);
 }
 
 .btn-outline:hover {
-  background: #4299e1;
-  color: white;
+  background: var(--emerald-dark);
+  color: #ffffff;
+  box-shadow: 0 16px 35px rgba(6, 22, 18, 0.7);
 }
 
+/* ESTADÍSTICAS */
 .estadisticas {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 2rem;
-  border-radius: 20px;
-  backdrop-filter: blur(10px);
-  color: white;
+  background: rgba(249, 252, 251, 0.96);
+  border-radius: 22px;
+  padding: 1.9rem 1.7rem;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(163, 216, 195, 0.9);
+  box-shadow:
+    0 24px 65px rgba(10, 28, 24, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.95);
+  color: #12222b;
 }
 
 .estadisticas h2 {
   text-align: center;
-  margin-bottom: 2rem;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  margin-bottom: 1.7rem;
+  font-size: 1.4rem;
 }
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.3rem;
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.2);
-  padding: 1.5rem;
-  border-radius: 16px;
+  padding: 1.2rem 1rem;
+  border-radius: 18px;
   text-align: center;
-  backdrop-filter: blur(10px);
+  background: radial-gradient(circle at top left, #f9fdfa 0, #e7f2ec 45%, #d8e7e0 100%);
+  box-shadow: 0 18px 40px rgba(10, 28, 24, 0.35);
 }
 
 .stat-number {
   display: block;
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
 }
 
 .stat-label {
-  font-size: 0.875rem;
-  opacity: 0.9;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: #5b6a76;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .cursos-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
   .container {
-    padding: 0 1rem;
+    padding: 0 1.4rem;
   }
-  
-  .cursos-grid {
-    grid-template-columns: 1fr;
+
+  .header h1 {
+    font-size: 1.9rem;
   }
-  
+
   .curso-header {
     flex-direction: column;
-    gap: 1rem;
+    align-items: flex-start;
   }
-  
+
   .curso-actions {
     flex-direction: column;
   }
-  
+
   .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .curso-card {
+    padding: 1.5rem 1.3rem;
+  }
+
+  .estadisticas {
+    padding: 1.6rem 1.3rem;
   }
 }
 </style>

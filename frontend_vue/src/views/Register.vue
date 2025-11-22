@@ -297,12 +297,10 @@ const isFormValid = computed(() => {
          form.value.role &&
          !validationError.value
 
-  // Para maestros, también validar especialidad
   if (form.value.role === 'maestro') {
     return baseValid && form.value.especialidad
   }
   
-  // Para estudiantes, validar campos obligatorios
   if (form.value.role === 'estudiante') {
     return baseValid && 
            form.value.carnet && 
@@ -319,7 +317,6 @@ const handleSubmit = async () => {
   if (!isFormValid.value) return
 
   try {
-    // Preparar datos según el rol
     const { confirmar_contrasena, ...baseData } = form.value
     const userData: any = {
       nombre: baseData.nombre,
@@ -328,14 +325,12 @@ const handleSubmit = async () => {
       role: baseData.role
     }
     
-    // Solo agregar campos específicos de maestro si el rol es maestro
     if (baseData.role === 'maestro') {
       userData.especialidad = baseData.especialidad || ''
       userData.biografia = baseData.biografia || ''
       userData.telefono = baseData.telefono || ''
     }
     
-    // Agregar campos específicos de estudiante si el rol es estudiante
     if (baseData.role === 'estudiante') {
       userData.carnet = baseData.carnet || ''
       userData.telefono = baseData.telefono || ''
@@ -351,35 +346,27 @@ const handleSubmit = async () => {
     if (result && result.access_token) {
       successMessage.value = 'Cuenta creada exitosamente. Redirigiendo...'
       
-      // Esperar un momento para mostrar el mensaje y luego redirigir
       setTimeout(() => {
         router.push('/dashboard')
       }, 2000)
     }
   } catch (err) {
     console.error('Error en registro:', err)
-    // El error ya se maneja en el store
   }
 }
 
 onMounted(() => {
   console.log('Register onMounted - iniciando')
-  
-  // Inicializar el store desde localStorage
   authStore.initializeFromStorage()
-  
   console.log('Auth state after init:', {
     hasToken: !!authStore.token,
     hasUser: !!authStore.user,
     isAuthenticated: authStore.isAuthenticated(),
     user: authStore.user
   })
-  
-  // Limpiar mensajes y errores previos
   authStore.clearError()
   successMessage.value = ''
   
-  // Solo redirigir si ya está autenticado Y tiene un usuario válido
   if (authStore.isAuthenticated() && authStore.user) {
     console.log('Redirecting to dashboard - user is authenticated')
     router.push('/dashboard')
@@ -390,128 +377,227 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* ===========================
+   PALETA & BASE (match Home/Login)
+   =========================== */
 .register {
-  min-height: calc(100vh - 140px);
+  --emerald-primary: #4f9085;      /* Verde esmeralda sutil */
+  --emerald-dark: #3a6f66;         /* Versión profunda para botones */
+  --emerald-soft: #e4f1ed;         /* Fondo muy suave */
+  --neutral-background: #f6f8fa;   /* Fondo general */
+  --neutral-dark: #23313f;         /* Texto principal */
+  --accent-highlight: #a3d8c3;     /* Acento claro */
+  --border-radius-primary: 18px;
+
+  min-height: calc(100vh - 80px);
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
-  padding: 2rem 0;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  font-family: 'Poppins', 'Roboto', 'Arial', sans-serif;
+  background:
+    radial-gradient(circle at top left, #eaf6f3 0, #d7ece6 40%, #c7e2dc 75%, #b9d8d2 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.register::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 12% 20%, rgba(79, 144, 133, 0.22), transparent 55%),
+              radial-gradient(circle at 80% 82%, rgba(163, 216, 195, 0.4), transparent 60%);
+  opacity: 0.9;
+  pointer-events: none;
 }
 
 .container {
+  position: relative;
+  z-index: 1;
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
+  width: 100%;
   display: flex;
   justify-content: center;
 }
 
+/* ===========================
+   CARD DEL FORMULARIO
+   =========================== */
 .register-form-container {
-  background: white;
-  padding: 3rem;
-  border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
   width: 100%;
-  max-width: 450px;
+  max-width: 520px;
+  padding: 2.7rem 2.6rem;
+  border-radius: var(--border-radius-primary);
+  box-shadow:
+    0 24px 65px rgba(15, 35, 34, 0.24),
+    0 0 0 1px rgba(255, 255, 255, 0.8);
+  position: relative;
+  overflow: hidden;
 }
 
+/* Overlay sutil */
+.register-form-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(79, 144, 133, 0.07), transparent 65%);
+  opacity: 1;
+  pointer-events: none;
+}
+
+/* Barra/acento lateral */
+.register-form-container::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 15%;
+  width: 4px;
+  height: 70%;
+  border-radius: 0 999px 999px 0;
+  background: linear-gradient(to bottom, var(--emerald-dark), var(--emerald-primary));
+}
+
+/* Contenido encima del overlay */
+.register-header,
+.register-form,
+.register-footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* ===========================
+   HEADER
+   =========================== */
 .register-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.2rem;
 }
 
 .register-header h1 {
   font-size: 2rem;
-  color: #2c3e50;
+  color: #12222b;
   margin-bottom: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
 .register-header p {
-  color: #6c757d;
-  font-size: 1rem;
+  color: #6d7a86;
+  font-size: 0.98rem;
 }
 
+/* ===========================
+   FORM
+   =========================== */
 .register-form {
   margin-bottom: 2rem;
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.4rem;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.5rem;
-  color: #2c3e50;
-  font-weight: 500;
+  margin-bottom: 0.45rem;
+  color: var(--neutral-dark);
+  font-weight: 600;
+  font-size: 0.95rem;
 }
 
+/* INPUTS, SELECT, TEXTAREA */
 .form-input {
   width: 100%;
-  padding: 1rem;
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  padding: 0.9rem 1.1rem;
+  border-radius: 12px;
+  border: 1px solid #dde3ea;
+  font-size: 0.96rem;
+  background: #fdfefe;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
   box-sizing: border-box;
+  resize: vertical;
+}
+
+.form-input::placeholder {
+  color: #a0acb7;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: #ff6b6b;
-  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+  border-color: var(--emerald-primary);
+  box-shadow: 0 0 0 3px rgba(79, 144, 133, 0.18);
+  background: #ffffff;
 }
 
 .form-input:disabled {
-  background-color: #f8f9fa;
+  background-color: var(--neutral-background);
   cursor: not-allowed;
 }
 
+/* ===========================
+   MENSAJES DE ESTADO
+   =========================== */
 .error-message {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  color: #721c24;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
+  background: #fff5f2;
+  border: 1px solid #f3c3b4;
+  color: #953125;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  margin-bottom: 0.9rem;
   font-size: 0.9rem;
 }
 
 .success-message {
-  background: #d4edda;
-  border: 1px solid #c3e6cb;
-  color: #155724;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
+  background: #e6f7ef;
+  border: 1px solid #b9e3cc;
+  color: #226644;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  margin-bottom: 0.9rem;
   font-size: 0.9rem;
 }
 
+/* ===========================
+   BOTONES (match Home/Login)
+   =========================== */
 .btn {
-  padding: 1rem 2rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s;
+  padding: 0.9rem 2rem;
+  border-radius: 999px;
   text-decoration: none;
-  display: inline-block;
-  text-align: center;
+  cursor: pointer;
+  font-size: 0.92rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease,
+    color 0.22s ease,
+    border-color 0.22s ease;
 }
 
 .btn-primary {
-  background: #ff6b6b;
-  color: white;
+  background: var(--emerald-dark);
+  color: #ffffff;
+  box-shadow: 0 10px 25px rgba(16, 52, 46, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #ee5a5a;
+  background: var(--emerald-primary);
   transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(8, 32, 26, 0.4);
 }
 
 .btn-primary:disabled {
-  background: #6c757d;
+  background: #9fb4c1;
+  box-shadow: none;
   cursor: not-allowed;
   transform: none;
 }
@@ -520,33 +606,44 @@ onMounted(() => {
   width: 100%;
 }
 
+/* ===========================
+   FOOTER
+   =========================== */
 .register-footer {
   text-align: center;
 }
 
 .register-footer p {
-  color: #6c757d;
+  color: #6d7a86;
+  font-size: 0.95rem;
   margin: 0;
 }
 
 .link {
-  color: #ff6b6b;
+  color: var(--emerald-dark);
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
+  margin-left: 0.2rem;
 }
 
 .link:hover {
   text-decoration: underline;
 }
 
+/* ===========================
+   RESPONSIVE
+   =========================== */
 @media (max-width: 768px) {
-  .register-form-container {
-    margin: 1rem;
-    padding: 2rem;
+  .register {
+    padding: 2.5rem 1.2rem;
   }
-  
+
+  .register-form-container {
+    padding: 2.3rem 1.8rem;
+  }
+
   .register-header h1 {
-    font-size: 1.75rem;
+    font-size: 1.8rem;
   }
 }
 </style>

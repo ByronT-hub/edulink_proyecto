@@ -103,97 +103,156 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Paleta de Colores Esmeralda Sutil y Apagado */
-:root {
-  /* Verde Esmeralda sutil */
-  --emerald-primary: #558B84; 
-  /* Tono más oscuro para hover y botones principales */
-  --emerald-dark: #3E6C66;     
-  /* Fondo muy claro, casi blanco */
-  --neutral-background: #F8F9FB; 
-  /* Texto principal/fondo oscuro (azul medianoche) */
-  --neutral-dark: #34495e;     
-  /* Acento muy claro y suave */
-  --accent-highlight: #A3D8C3; 
-  --border-radius-primary: 16px; 
-}
-
-/* --- ESTILO GLOBAL DE FUENTE --- */
+/* ===========================
+   PALETA & BASE (match Home)
+   =========================== */
 .login {
-  min-height: calc(100vh - 140px);
+  --emerald-primary: #4f9085;      /* Verde esmeralda sutil */
+  --emerald-dark: #3a6f66;         /* Versión profunda para botones */
+  --emerald-soft: #e4f1ed;         /* Fondo muy suave */
+  --neutral-background: #f6f8fa;   /* Fondo general */
+  --neutral-dark: #23313f;         /* Texto principal */
+  --accent-highlight: #a3d8c3;     /* Acento claro */
+  --border-radius-primary: 18px;
+
+  min-height: calc(100vh - 80px);
   display: flex;
   align-items: center;
-  /* Fondo usando degradado sutil de esmeralda */
-  background: linear-gradient(135deg, var(--emerald-primary) 0%, #7CB8B0 100%);
-  padding: 2rem 0;
-  font-family: 'Poppins', 'Roboto', 'Arial', sans-serif; 
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  font-family: 'Poppins', 'Roboto', 'Arial', sans-serif;
+  background:
+    radial-gradient(circle at top left, #eaf6f3 0, #d7ece6 40%, #c7e2dc 75%, #b9d8d2 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.login::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 10% 20%, rgba(79, 144, 133, 0.22), transparent 55%),
+              radial-gradient(circle at 80% 80%, rgba(163, 216, 195, 0.4), transparent 60%);
+  opacity: 0.85;
+  pointer-events: none;
 }
 
 .container {
+  position: relative;
+  z-index: 1;
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
+  width: 100%;
   display: flex;
   justify-content: center;
 }
 
-/* --- CONTENEDOR DEL FORMULARIO --- */
+/* ===========================
+   CARD DEL FORMULARIO
+   =========================== */
 .login-form-container {
-  background: white;
-  padding: 3rem;
-  border-radius: var(--border-radius-primary); /* Bordes redondeados */
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
   width: 100%;
-  max-width: 420px; /* Ligeramente más ancho */
+  max-width: 440px;
+  padding: 2.8rem 2.6rem;
+  border-radius: var(--border-radius-primary);
+  box-shadow:
+    0 22px 60px rgba(15, 35, 34, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.75);
+  position: relative;
+  overflow: hidden;
 }
 
+/* detalle lateral esmeralda suave */
+.login-form-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(79, 144, 133, 0.08), transparent 60%);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* pequeña barra/acento a la izquierda */
+.login-form-container::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 18%;
+  width: 4px;
+  height: 64%;
+  border-radius: 0 999px 999px 0;
+  background: linear-gradient(to bottom, var(--emerald-dark), var(--emerald-primary));
+}
+
+/* el contenido real encima de los overlays */
+.login-header,
+.login-form,
+.login-footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* ===========================
+   HEADER
+   =========================== */
 .login-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.4rem;
 }
 
 .login-header h1 {
-  font-size: 2.2rem; /* Ligeramente más grande */
-  color: var(--neutral-dark);
-  margin-bottom: 0.5rem;
+  font-size: 2.1rem;
+  color: #12222b;
+  margin-bottom: 0.6rem;
   font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
 .login-header p {
-  color: #6c757d;
-  font-size: 1.1rem;
+  color: #6d7a86;
+  font-size: 0.98rem;
 }
 
+/* ===========================
+   FORM
+   =========================== */
 .login-form {
   margin-bottom: 2rem;
 }
 
 .form-group {
-  margin-bottom: 1.8rem; /* Más espacio entre grupos */
+  margin-bottom: 1.7rem;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.5rem;
   color: var(--neutral-dark);
-  font-weight: 600; /* Fuente más audaz */
+  font-weight: 600;
+  font-size: 0.95rem;
 }
 
-/* --- INPUTS --- */
+/* INPUTS */
 .form-input {
   width: 100%;
-  padding: 1rem 1.25rem; /* Más padding horizontal */
-  border: 1px solid #e9ecef;
-  border-radius: 10px; /* Bordes suaves */
-  font-size: 1rem;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  padding: 0.9rem 1.1rem;
+  border-radius: 12px;
+  border: 1px solid #dde3ea;
+  font-size: 0.98rem;
+  background: #fdfefe;
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
   box-sizing: border-box;
+}
+
+.form-input::placeholder {
+  color: #a0acb7;
 }
 
 .form-input:focus {
   outline: none;
-  border-color: var(--emerald-primary); /* Acento esmeralda en foco */
-  box-shadow: 0 0 0 4px rgba(85, 139, 132, 0.15); /* Sombra suave de acento */
+  border-color: var(--emerald-primary);
+  box-shadow: 0 0 0 3px rgba(79, 144, 133, 0.18);
+  background: #ffffff;
 }
 
 .form-input:disabled {
@@ -201,83 +260,105 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
-/* --- MENSAJE DE ERROR --- */
+/* ===========================
+   MENSAJE DE ERROR
+   =========================== */
 .error-message {
-  background: #fff3cd; /* Amarillo suave para error (neutral pero visible) */
-  border: 1px solid #ffe0a3;
-  color: #856404;
-  padding: 0.85rem 1.2rem;
-  border-radius: 10px;
-  margin-bottom: 1.8rem;
-  font-size: 0.95rem;
+  background: #fff5f2;
+  border: 1px solid #f3c3b4;
+  color: #953125;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  margin-bottom: 1.6rem;
+  font-size: 0.9rem;
 }
 
-/* --- BOTONES --- */
+/* ===========================
+   BOTONES (match Home)
+   =========================== */
 .btn {
-  padding: 1rem 2rem;
-  border: none;
-  border-radius: 50px; /* Estilo píldora para elegancia moderna */
-  font-size: 1.1rem; /* Botón ligeramente más grande */
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
+  padding: 0.9rem 2rem;
+  border-radius: 999px;
   text-decoration: none;
-  display: inline-block;
-  text-align: center;
+  cursor: pointer;
+  font-size: 0.92rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    background 0.22s ease,
+    color 0.22s ease,
+    border-color 0.22s ease;
 }
 
 .btn-primary {
-  background: var(--emerald-dark); /* Color más fuerte para el CTA */
-  color: white;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background: var(--emerald-dark);
+  color: #ffffff;
+  box-shadow: 0 10px 25px rgba(16, 52, 46, 0.3);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--emerald-primary); /* Se aclara ligeramente en hover */
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  background: var(--emerald-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(8, 32, 26, 0.4);
 }
 
 .btn-primary:disabled {
-  background: #b0c4de; /* Tono más neutro y suave cuando está deshabilitado */
+  background: #9fb4c1;
+  box-shadow: none;
   cursor: not-allowed;
   transform: none;
-  box-shadow: none;
 }
 
 .btn-full {
   width: 100%;
 }
 
-/* --- FOOTER --- */
+/* ===========================
+   FOOTER
+   =========================== */
 .login-footer {
   text-align: center;
 }
 
 .login-footer p {
-  color: #6c757d;
+  color: #6d7a86;
+  font-size: 0.95rem;
   margin: 0;
 }
 
 .link {
-  color: var(--emerald-primary); /* Link usa el color principal esmeralda */
+  color: var(--emerald-dark);
   text-decoration: none;
   font-weight: 600;
+  margin-left: 0.2rem;
 }
 
 .link:hover {
   text-decoration: underline;
 }
 
-/* --- MEDIA QUERIES (Responsividad) --- */
+/* ===========================
+   RESPONSIVE
+   =========================== */
 @media (max-width: 768px) {
-  .login-form-container {
-    margin: 1rem;
-    padding: 2rem;
+  .login {
+    padding: 2.5rem 1.2rem;
   }
-  
+
+  .login-form-container {
+    padding: 2.3rem 1.8rem;
+  }
+
   .login-header h1 {
-    font-size: 1.75rem;
+    font-size: 1.8rem;
   }
 }
 </style>
