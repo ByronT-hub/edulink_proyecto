@@ -150,6 +150,8 @@ Route::middleware(['role:admin'])->group(function () {
     
     // Métricas (Laravel → Rails)
     Route::get('/metricas/cursos', [MetricasController::class, 'cursos']);
+    // Métricas resumen (nuevo)
+    Route::get('/metricas/resumen', [MetricasController::class, 'resumen']);
     
     // Reportes
     Route::get('/reportes/inscripciones', [InscripcionController::class, 'reportes']);
