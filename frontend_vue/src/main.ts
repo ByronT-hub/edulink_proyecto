@@ -28,6 +28,11 @@ import MiPerfilEstudiante from './views/MiPerfilEstudiante.vue'
 
 // Configurar rutas
 const routes = [
+          { path: '/admin/reportes', name: 'admin-reportes', component: () => import('./views/AdminReportes.vue'), meta: { requiresAuth: true, requiresRole: 'admin' } },
+        { path: '/admin/cursos-por-maestro', name: 'admin-cursos-por-maestro', component: () => import('./views/AdminCursosPorMaestro.vue'), meta: { requiresAuth: true, requiresRole: 'admin' } },
+      // Rutas de administración (solo admin)
+      { path: '/admin/maestros', name: 'admin-maestros', component: () => import('./views/AdminMaestros.vue'), meta: { requiresAuth: true, requiresRole: 'admin' } },
+      { path: '/admin/estudiantes', name: 'admin-estudiantes', component: () => import('./views/AdminEstudiantes.vue'), meta: { requiresAuth: true, requiresRole: 'admin' } },
     { path: '/maestro/agregar-tareas/:id', name: 'agregar-tareas', component: () => import('./views/AgregarTareas.vue'), props: true, meta: { requiresAuth: true, requiresRole: 'maestro' } },
   { path: '/', name: 'home', component: Home },
   { path: '/courses', name: 'courses', component: Courses },

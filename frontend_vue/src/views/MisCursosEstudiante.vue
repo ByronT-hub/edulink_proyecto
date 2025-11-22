@@ -232,7 +232,8 @@ const cargarMisCursos = async () => {
   error.value = ''
 
   try {
-    const response = await fetch('http://localhost:8000/api/mis-cursos', {
+    // Usar el endpoint relativo para que el proxy de Vite funcione
+    const response = await fetch('/api/mis-cursos', {
       headers: {
         'Authorization': `Bearer ${authStore.token}`,
         'Content-Type': 'application/json'

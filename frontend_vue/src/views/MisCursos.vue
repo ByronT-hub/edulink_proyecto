@@ -102,7 +102,7 @@ const cargarCursos = async () => {
       return
     }
 
-    const response = await fetch(`http://localhost:8000/api/maestros/${user.id}/cursos`, {
+    const response = await fetch(`/api/maestros/${user.id}/cursos`, {
       headers: {
         'Authorization': `Bearer ${authStore.token}`,
         'Content-Type': 'application/json'

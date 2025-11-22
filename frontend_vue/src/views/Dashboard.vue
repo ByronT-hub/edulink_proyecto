@@ -10,29 +10,35 @@
         
         <div class="dashboard-stats">
           <div class="stat-card">
-            <div class="stat-icon">👥</div>
+            <div class="stat-icon">👨‍🏫</div>
             <div class="stat-info">
-              <h3>Gestión de Usuarios</h3>
-              <p>Crear, editar y eliminar usuarios</p>
-              <button class="btn btn-primary">Gestionar Usuarios</button>
+              <h3>Maestros</h3>
+              <p>Ver y editar maestros</p>
+              <router-link to="/admin/maestros" class="btn btn-primary">Gestionar Maestros</router-link>
             </div>
           </div>
-          
+          <div class="stat-card">
+            <div class="stat-icon">👨‍🎓</div>
+            <div class="stat-info">
+              <h3>Estudiantes</h3>
+              <p>Ver y editar estudiantes</p>
+              <router-link to="/admin/estudiantes" class="btn btn-primary">Gestionar Estudiantes</router-link>
+            </div>
+          </div>
           <div class="stat-card">
             <div class="stat-icon">📚</div>
             <div class="stat-info">
               <h3>Gestión de Cursos</h3>
               <p>Supervisar todos los cursos</p>
-              <button class="btn btn-primary">Ver Cursos</button>
+              <router-link to="/admin/cursos-por-maestro" class="btn btn-primary">Ver Cursos por Maestro</router-link>
             </div>
           </div>
-          
           <div class="stat-card">
             <div class="stat-icon">📊</div>
             <div class="stat-info">
               <h3>Reportes</h3>
               <p>Métricas y estadísticas</p>
-              <button class="btn btn-primary">Ver Reportes</button>
+              <router-link to="/admin/reportes" class="btn btn-primary">Ver Reportes</router-link>
             </div>
           </div>
         </div>
@@ -131,13 +137,14 @@
         </div>
       </div>
 
-      <!-- Fallback si no hay rol definido -->
+      <!-- Fallback si no hay rol definido o es desconocido -->
       <div v-else class="dashboard-loading">
         <div class="loading-content">
-          <h1>Cargando Dashboard...</h1>
-          <p>Detectando tipo de usuario...</p>
+          <h1>Advertencia: Rol desconocido</h1>
+          <p>No se pudo determinar el tipo de usuario o el rol es incorrecto.</p>
           <p>Usuario actual: {{ user ? user.nombre : 'No definido' }}</p>
           <p>Rol: {{ user ? user.role : 'No definido' }}</p>
+          <p style="color:#c00;font-weight:bold;">Contacta a soporte o revisa la configuración del backend y el store.</p>
         </div>
       </div>
     </div>
@@ -145,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -155,34 +162,32 @@ const authStore = useAuthStore()
 const user = computed(() => authStore.user)
 
 onMounted(async () => {
-  console.log('Dashboard mounted, user:', user.value)
-  
-  // Inicializar store
   authStore.initializeFromStorage()
-  
-  // Si no está autenticado, redirigir al login
   if (!authStore.isAuthenticated()) {
-    console.log('User not authenticated, redirecting to login')
     router.push('/login')
     return
   }
-  
-  console.log('User authenticated:', user.value)
-  
-  // Solo obtener datos del servidor si no tenemos el rol definido
   if (!user.value?.role) {
     try {
       await authStore.getCurrentUser()
-      console.log('User data updated from server:', user.value)
     } catch (error) {
-      console.error('Error al obtener datos del usuario:', error)
-      // No redirigir inmediatamente si tenemos datos básicos
       if (!user.value?.nombre) {
         router.push('/login')
       }
     }
-  } else {
-    console.log('User data already complete:', user.value)
+  }
+  if (user.value && user.value.role !== 'maestro' && router.currentRoute.value.path.startsWith('/maestro')) {
+    await authStore.logout()
+    router.push('/login')
+    return
+  }
+})
+
+watch(user, (newUser) => {
+  if (!newUser) return
+  if (!newUser.role) return
+  if (newUser.role === 'maestro' && router.currentRoute.value.path !== '/dashboard') {
+    router.push('/dashboard')
   }
 })
 </script>
@@ -213,9 +218,6 @@ onMounted(async () => {
   padding: 0 2rem;
 }
 
-/* ===========================
-   HEADER GENERAL
-   =========================== */
 .dashboard-header {
   text-align: center;
   margin-bottom: 2.4rem;
@@ -234,23 +236,18 @@ onMounted(async () => {
   margin: 0.2rem 0;
 }
 
-/* Especialidad maestro */
 .especialidad {
   font-style: italic;
   color: var(--emerald-dark) !important;
   font-weight: 600;
 }
 
-/* ===========================
-   GRID DE CARDS
-   =========================== */
 .dashboard-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1.8rem;
 }
 
-/* CARD */
 .stat-card {
   background: rgba(255, 255, 255, 0.98);
   padding: 1.8rem 1.6rem;
@@ -275,7 +272,6 @@ onMounted(async () => {
   border-color: var(--emerald-primary);
 }
 
-/* Icono */
 .stat-icon {
   font-size: 2.3rem;
   display: flex;
@@ -284,7 +280,6 @@ onMounted(async () => {
   min-width: 3rem;
 }
 
-/* Texto */
 .stat-info h3 {
   font-size: 1.1rem;
   color: #12222b;
@@ -297,9 +292,6 @@ onMounted(async () => {
   font-size: 0.9rem;
 }
 
-/* ===========================
-   BOTONES REUTILIZADOS
-   =========================== */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -321,7 +313,6 @@ onMounted(async () => {
     border-color 0.22s ease;
 }
 
-/* Principal */
 .btn-primary {
   background: var(--emerald-dark);
   color: #ffffff;
@@ -334,7 +325,6 @@ onMounted(async () => {
   box-shadow: 0 16px 36px rgba(5, 22, 18, 0.65);
 }
 
-/* Success (pero en esmeralda, no verde chillón) */
 .btn-success {
   background: linear-gradient(135deg, #4f9085 0%, #5ca598 100%);
   color: #ffffff;
@@ -347,7 +337,6 @@ onMounted(async () => {
   box-shadow: 0 16px 38px rgba(5, 22, 18, 0.65);
 }
 
-/* Outline */
 .btn-outline {
   background: #ffffff;
   border: 1px solid rgba(163, 216, 195, 0.9);
@@ -361,9 +350,6 @@ onMounted(async () => {
   transform: translateY(-1px);
 }
 
-/* ===========================
-   ESTADO LOADING / FALLBACK
-   =========================== */
 .dashboard-loading {
   margin-top: 2.5rem;
   display: flex;
@@ -394,27 +380,20 @@ onMounted(async () => {
   font-size: 0.9rem;
 }
 
-/* ===========================
-   RESPONSIVE
-   =========================== */
 @media (max-width: 768px) {
   .container {
     padding: 0 1.4rem;
   }
-
   .dashboard-header h1 {
     font-size: 1.8rem;
   }
-
   .stat-card {
     padding: 1.5rem 1.3rem;
     border-radius: 20px;
   }
-
   .dashboard-stats {
     grid-template-columns: 1fr;
   }
-
   .loading-content {
     padding: 1.8rem 1.5rem;
   }
