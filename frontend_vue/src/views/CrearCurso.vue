@@ -36,7 +36,7 @@
 
             <div class="form-row">
               <div class="form-group">
-                <label for="precio">Precio (USD) *</label>
+                <label for="precio">Precio (Q) *</label>
                 <input 
                   type="number" 
                   id="precio"

@@ -41,7 +41,7 @@
         >
           <div class="maestro-header">
             <div class="avatar">
-              {{ maestro.nombre.charAt(0).toUpperCase() }}
+              {{ maestro.nombre ? maestro.nombre.charAt(0).toUpperCase() : '?' }}
             </div>
             <div class="info">
               <h3>{{ maestro.nombre }}</h3>

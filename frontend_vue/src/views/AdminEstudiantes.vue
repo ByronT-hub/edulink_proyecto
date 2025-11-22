@@ -35,7 +35,7 @@
         >
           <div class="estudiante-header">
             <div class="avatar">
-              {{ estudiante.nombre.charAt(0).toUpperCase() }}
+              {{ estudiante.nombre ? estudiante.nombre.charAt(0).toUpperCase() : '?' }}
             </div>
             <div class="info">
               <h3>{{ estudiante.nombre }}</h3>
