@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Estudiante;
 use App\Models\Curso;
 use App\Models\Pago;
-use App\Models\Certificado; // <-- 🔥 IMPORTANTE, FALTABA
+use App\Models\Certificado;
 
 class Inscripcion extends Model
 {
@@ -19,6 +19,11 @@ class Inscripcion extends Model
         'estudiante_id',
         'curso_id',
         'estado'
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function estudiante()

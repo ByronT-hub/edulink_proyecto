@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -9,11 +10,17 @@ return new class extends Migration {
         Schema::create('progresos', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('inscripcion_id');
-            $table->json('lecciones_completadas'); // array de identificadores de lecciones completadas
-            $table->unsignedTinyInteger('porcentaje')->default(0); // avance en porcentaje
+
+            $table->json('lecciones_completadas')->nullable();
+            $table->unsignedTinyInteger('porcentaje')->default(0);
+
             $table->timestamps();
 
-            $table->foreign('inscripcion_id')->references('id')->on('inscripcions')->onDelete('cascade');
+            // 🔥 CORRECCIÓN: NOMBRE REAL DE LA TABLA
+            $table->foreign('inscripcion_id')
+                  ->references('id')
+                  ->on('inscripciones')
+                  ->onDelete('cascade');
         });
     }
 

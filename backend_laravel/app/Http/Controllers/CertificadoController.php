@@ -1,68 +1,42 @@
 <?php
-
+ 
 namespace App\Http\Controllers;
-
+ 
+use App\Models\Inscripcion;
 use App\Models\Certificado;
-use App\Models\Estudiante;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+ 
 class CertificadoController extends Controller
 {
-    /**
-     * Mostrar un certificado específico
-     */
-    public function show($id)
+    public function descargar($inscripcionId)
     {
-        $certificado = Certificado::with([
-            'inscripcion.estudiante',
-            'inscripcion.curso',
-        ])->find($id);
-
-        if (!$certificado) {
-            return response()->json(['error' => 'Certificado no encontrado'], 404);
-        }
-
-        return response()->json([
-            'id' => $certificado->id,
-            'codigo' => $certificado->codigo,
-            'url_qr' => $certificado->url_qr,
-            'fecha_emision' => $certificado->fecha_emision,
-            'estudiante' => $certificado->inscripcion->estudiante->only(['id', 'nombre', 'correo']),
-            'curso' => [
-                'id' => $certificado->inscripcion->curso->id,
-                'titulo' => $certificado->inscripcion->curso->titulo,
-                'costo_centavos' => $certificado->inscripcion->curso->costo_centavos,
-            ],
-        ]);
-    }
-
-    /**
-     * Obtener certificados del estudiante autenticado
-     */
-    public function misCertificados(Request $request)
-    {
-        $user = $request->user();
-        
-        if (!($user instanceof Estudiante)) {
-            return response()->json(['error' => 'Solo estudiantes pueden acceder a esta función'], 403);
-        }
-
-        $certificados = $user->certificados()->with([
-            'inscripcion.curso'
-        ])->get();
-
-        return response()->json($certificados->map(function ($cert) {
-            return [
-                'id' => $cert->id,
-                'codigo' => $cert->codigo,
-                'url_qr' => $cert->url_qr,
-                'fecha_emision' => $cert->fecha_emision,
-                'curso' => [
-                    'id' => $cert->inscripcion->curso->id,
-                    'titulo' => $cert->inscripcion->curso->titulo,
-                    'descripcion' => $cert->inscripcion->curso->descripcion,
-                ]
-            ];
-        }));
+        $inscripcion = Inscripcion::with('estudiante', 'curso')->findOrFail($inscripcionId);
+ 
+        // Crear o recuperar certificado existente
+        $cert = Certificado::firstOrCreate(
+            ['inscripcion_id' => $inscripcionId],
+            [
+                'codigo' => strtoupper(Str::random(10)),
+                'fecha_emision' => now()
+            ]
+        );
+ 
+        // Convertir fecha_emision a Carbon
+        $fechaEmision = Carbon::parse($cert->fecha_emision);
+ 
+        // Datos para la vista PDF
+        $data = [
+            'nombre' => $inscripcion->estudiante->nombre,
+            'curso' => $inscripcion->curso->titulo,
+            'fecha' => $fechaEmision->format('d/m/Y'),
+            'codigo' => $cert->codigo,
+        ];
+ 
+        $pdf = Pdf::loadView('certificados.certificado', $data);
+ 
+        return $pdf->download("certificado_{$inscripcionId}.pdf");
     }
 }

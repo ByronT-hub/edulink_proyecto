@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Inscripcion;
-use App\Models\Curso;
 use Illuminate\Http\Request;
 
 class InscripcionController extends Controller
@@ -82,5 +81,22 @@ class InscripcionController extends Controller
             $inscripcion->load(['estudiante', 'curso']),
             201
         );
+    }
+
+    /**
+     * NUEVA FUNCIÓN:
+     * Obtener inscripción real del estudiante según curso.
+     */
+    public function findByCourse(Request $request, $cursoId)
+    {
+        $user = $request->auth_user;
+
+        $inscripcion = Inscripcion::where('curso_id', $cursoId)
+            ->where('estudiante_id', $user->id)
+            ->first();
+
+        return response()->json([
+            'inscripcion' => $inscripcion
+        ]);
     }
 }
