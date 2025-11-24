@@ -1,4 +1,4 @@
-<template>
+button<template>
   <div class="curso-contenido-bg">
     <div class="container">
       <div class="header">
@@ -78,16 +78,26 @@ const estructura = ref<any[]>([])
 const loading = ref(true)
 const error = ref('')
 
-const studentStore = useStudentStore()
-const enrollmentStore = useEnrollmentStore()
 const progressStore = useProgressStore()
 
 const leccionesCompletadas = ref<number[]>([])
 const porcentaje = ref(0)
 let inscripcionId: number | null = null
 
-// ID único para cada lección
+// ID único por lección
 const leccionId = (mIdx: number, lIdx: number) => mIdx * 1000 + lIdx
+
+// Obtener inscripción real
+const cargarInscripcionReal = async () => {
+  const token = localStorage.getItem('edulink_token')
+
+  const res = await fetch(`http://localhost:8000/api/inscripciones/curso/${cursoId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+
+  const data = await res.json()
+  inscripcionId = data.inscripcion ? data.inscripcion.id : null
+}
 
 const calcularPorcentaje = () => {
   const total = estructura.value.reduce(
@@ -113,61 +123,87 @@ const cargarEstructura = async () => {
   }
 }
 
-const cargarInscripcionYProgreso = async () => {
-  await enrollmentStore.fetchEnrollments()
-
-  const student = studentStore.student
-  if (!student) return
-
-  const inscripcion = enrollmentStore.enrollments.find(
-    e => e.curso_id === cursoId && e.estudiante_id === student.id
-  )
-
-  if (!inscripcion) return
-
-  inscripcionId = inscripcion.id
+// Obtener progreso guardado
+const cargarProgreso = async () => {
+  if (!inscripcionId) return
 
   await progressStore.fetchProgress(inscripcionId)
 
   if (progressStore.progress) {
     leccionesCompletadas.value = progressStore.progress.lecciones_completadas || []
-  } else {
-    leccionesCompletadas.value = []
   }
+
   porcentaje.value = calcularPorcentaje()
 }
 
+// 🔥 CORREGIDO: Enviar payload correcto
 const guardarProgreso = async () => {
   if (!inscripcionId) return
-  // La barra ya se actualiza por el watcher, solo guardar en backend
-  try {
-    await progressStore.updateProgress(
-      inscripcionId,
-      leccionesCompletadas.value,
-      porcentaje.value
-    )
-  } catch (e) {
-    // Si falla, recargar progreso desde backend
-    await cargarInscripcionYProgreso()
+
+  const payload = {
+    lecciones_completadas: [...leccionesCompletadas.value],
+    porcentaje: porcentaje.value
   }
+
+  console.log("ENVIANDO PROGRESO A API:", payload)
+
+  await progressStore.updateProgress(inscripcionId, payload)
 }
 
-// Hacer la barra reactiva: recalcula porcentaje cada vez que cambian los checkboxes
 watch(leccionesCompletadas, () => {
   porcentaje.value = calcularPorcentaje()
 })
 
+// Descargar certificado
+const completarCurso = async () => {
+  if (!inscripcionId) {
+    alert("Error: No se encontró la inscripción del curso.")
+    return
+  }
 
-// NUEVA FUNCIÓN
-const completarCurso = () => {
-  alert("Curso completado 🎉 (Aquí puedes generar el certificado o cambiar el estado)")
+  try {
+    const token = localStorage.getItem('edulink_token')
+
+    const response = await fetch(
+      `http://localhost:8000/api/certificados/${inscripcionId}/descargar`,
+      { 
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    if (!response.ok) {
+      alert("No se pudo generar el certificado.")
+      return
+    }
+
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+
+    const a = document.createElement("a")
+    a.href = url
+    a.download = "certificado.pdf"
+    a.click()
+
+    window.URL.revokeObjectURL(url)
+
+    alert("🎉 ¡Curso completado! Tu certificado ha sido descargado.")
+
+  } catch (error) {
+    console.error(error)
+    alert("Ocurrió un error al generar el certificado.")
+  }
 }
 
 onMounted(async () => {
+  await cargarInscripcionReal()
   await cargarEstructura()
-  await cargarInscripcionYProgreso()
+  await cargarProgreso()
 })
 </script>
+
 
 <style scoped>
 .curso-contenido-bg {
