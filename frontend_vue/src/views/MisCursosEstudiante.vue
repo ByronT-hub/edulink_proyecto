@@ -124,65 +124,25 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
-interface Curso {
-  id: number
-  titulo: string
-  descripcion: string
-  precio: number
-  duracion: number
-  nivel: string
-  categoria: string
-  maestro?: {
-    nombre: string
-  }
-}
-
-interface Pago {
-  id: number
-  monto_centavos: number
-  metodo_pago: string
-  created_at: string
-}
-
-interface Inscripcion {
-  id: number
-  estado: string
-  created_at: string
-  curso: Curso
-  pagos?: Pago[]
-}
-
 const router = useRouter()
 const authStore = useAuthStore()
 
 const loading = ref(false)
 const error = ref('')
-const misCursos = ref<Inscripcion[]>([])
+const misCursos = ref([])
 
-// Computed properties para estadísticas
-const cursosActivos = computed(() => 
-  misCursos.value.filter(i => i.estado === 'pagado').length
-)
-
-const horasTotales = computed(() =>
-  misCursos.value.reduce((total, i) => 
-    i.estado === 'pagado' ? total + (i.curso.duracion || 0) : total, 0
-  )
-)
-
-const totalInvertido = computed(() =>
-  misCursos.value.reduce((total, i) => {
-    if (i.pagos && i.pagos.length > 0) {
-      return total + (i.pagos[0].monto_centavos / 100)
-    }
-    return total
-  }, 0).toFixed(2)
-)
-
+// PROGRESO REAL
+const calcularProgreso = (inscripcion: any) => {
+  if (inscripcion.progreso && inscripcion.progreso.porcentaje !== undefined) {
+    return inscripcion.progreso.porcentaje
+  }
+  return 0
+}
 
 const estadoClass = (estado: string) => {
   switch (estado) {
     case 'pagado':
+    case 'completado':
       return 'success'
     case 'pendiente':
       return 'warning'
@@ -197,6 +157,8 @@ const estadoTexto = (estado: string) => {
   switch (estado) {
     case 'pagado':
       return '✅ Activo'
+    case 'completado':
+      return '🏆 Completado'
     case 'pendiente':
       return '⏳ Pendiente'
     case 'cancelado':
@@ -206,33 +168,23 @@ const estadoTexto = (estado: string) => {
   }
 }
 
-const formatearFecha = (fecha: string) => {
-  return new Date(fecha).toLocaleDateString('es-GT', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  })
+// BOTÓN INTELIGENTE
+const handleAccion = (inscripcion: any) => {
+  if (inscripcion.estado === 'completado') {
+    router.push(`/certificados`)
+    return
+  }
+  router.push(`/curso/${inscripcion.curso.id}/contenido`)
 }
 
-const calcularProgreso = (inscripcion: Inscripcion) => {
-  // Por ahora retornamos un progreso simulado
-  if (inscripcion.estado === 'pagado') {
-    return Math.floor(Math.random() * 100)
-  }
-  return 0
+const formatearFecha = (fecha: string) => {
+  return new Date(fecha).toLocaleDateString('es-GT')
 }
 
 const cargarMisCursos = async () => {
-  if (!authStore.isAuthenticated()) {
-    router.push('/login')
-    return
-  }
-
   loading.value = true
-  error.value = ''
 
   try {
-    // Usar el endpoint relativo para que el proxy de Vite funcione
     const response = await fetch('/api/mis-cursos', {
       headers: {
         'Authorization': `Bearer ${authStore.token}`,
@@ -245,22 +197,13 @@ const cargarMisCursos = async () => {
     if (response.ok) {
       misCursos.value = data.inscripciones || []
     } else {
-      throw new Error(data.error || 'Error al cargar los cursos')
+      throw new Error(data.error || 'Error al cargar cursos')
     }
   } catch (err: any) {
-    error.value = err.message || 'Error al cargar los cursos'
-    console.error('Error:', err)
+    error.value = err.message
   } finally {
     loading.value = false
   }
-}
-
-const accederCurso = (cursoId: number) => {
-  router.push(`/curso/${cursoId}/contenido`)
-}
-
-const verDetalles = (inscripcionId: number) => {
-  router.push(`/inscripcion/${inscripcionId}/detalles`)
 }
 
 onMounted(() => {
