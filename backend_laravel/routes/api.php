@@ -69,11 +69,11 @@ Route::middleware(['simple_auth'])->group(function () {
     Route::get('/progresos/{inscripcionId}', [ProgresoController::class, 'show']);
     Route::put('/progresos/{inscripcionId}', [ProgresoController::class, 'update']);
 
-    // ======================
-    // CERTIFICADOS
-    // ======================
-    Route::get('/certificados/{id}', [CertificadoController::class, 'show']);
-    Route::get('/mis-certificados', [CertificadoController::class, 'misCertificados']);
-    Route::get('/certificados/{inscripcionId}/descargar', [CertificadoController::class, 'descargar']);
+// CERTIFICADOS
+Route::get('/mis-certificados', [CertificadoController::class, 'misCertificados']);
+Route::get('/certificados/{id}', [CertificadoController::class, 'show']);
+Route::get('/certificados/{inscripcionId}/descargar', [CertificadoController::class, 'descargar']);
+
+
 });
 
