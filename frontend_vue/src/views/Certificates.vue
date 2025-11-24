@@ -95,27 +95,26 @@
               </div>
 
               <div class="qr-code-section">
-                <div class="qr-placeholder">
-                  <span>QR Code</span>
-                  <small>{{ certificate.codigo }}</small>
-                </div>
+                <QRCodeVue
+                  :value="`https://edulink.uvg/certificates/verify/${certificate.codigo}`"
+                  :size="120"
+                  :level="'M'"
+                  :bgColor="'#ecf1f5'"
+                  :fgColor="'#23313f'"
+                  style="margin: 0 auto; display: block; border-radius: 8px; background: #ecf1f5; padding: 8px;"
+                />
+                <small style="display:block; text-align:center; margin-top:0.5rem; font-size:0.8rem; color:#6d7a86;">{{ certificate.codigo }}</small>
               </div>
             </div>
 
-            <div class="certificate-actions">
+            <div class="certificate-actions" style="justify-content: center;">
               <button 
                 @click="downloadCertificate(certificate.inscripcion_id)"
                 :disabled="downloading === certificate.inscripcion_id"
                 class="btn btn-primary"
+                style="margin: 0 auto; min-width: 180px; display: block;"
               >
                 {{ downloading === certificate.inscripcion_id ? 'Descargando...' : '📥 Descargar PDF' }}
-              </button>
-
-              <button 
-                @click="verifyCertificate(certificate.codigo)"
-                class="btn btn-secondary"
-              >
-                🔍 Verificar
               </button>
             </div>
           </div>
@@ -165,10 +164,12 @@
   </div>
 </template>
 
+
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useCertificateStore } from '@/stores/certificate'
 import { useStudentStore } from '@/stores/student'
+import QRCodeVue from 'qrcode.vue'
 
 const certificateStore = useCertificateStore()
 const studentStore = useStudentStore()
