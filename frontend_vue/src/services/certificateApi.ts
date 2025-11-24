@@ -3,16 +3,24 @@ import type { Certificate } from '@/types/certificate'
 
 const certificateApi = {
 
-  // Obtener mis certificados
+  // Obtener TODOS los certificados del usuario
   getMyCertificates: async (): Promise<Certificate[]> => {
-    const response = await apiClient.get('/mis-certificados')
-    return response.data
+    const { data } = await apiClient.get('/mis-certificados')
+    return data
   },
 
-  // Obtener certificado por ID
-  getById: async (id: number): Promise<Certificate> => {
-    const response = await apiClient.get(`/certificados/${id}`)
-    return response.data
+  // Descargar PDF
+  download: async (id: number): Promise<Blob> => {
+    const { data } = await apiClient.get(`/certificados/${id}/descargar`, {
+      responseType: 'blob'
+    })
+    return data
+  },
+
+  // VALIDAR certificado por código
+  validate: async (codigo: string) => {
+    const { data } = await apiClient.get(`/certificados/validar/${codigo}`)
+    return data
   }
 }
 

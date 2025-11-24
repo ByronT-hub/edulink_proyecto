@@ -28,15 +28,15 @@
               <p>Certificados Totales</p>
             </div>
           </div>
-          
+
           <div class="stat-card">
             <div class="stat-icon">✅</div>
             <div class="stat-info">
-              <h3>{{ validCertificates }}</h3>
+                <h3>{{ validCertificates.length }}</h3>
               <p>Certificados Válidos</p>
             </div>
           </div>
-          
+
           <div class="stat-card">
             <div class="stat-icon">📅</div>
             <div class="stat-info">
@@ -47,11 +47,14 @@
         </div>
 
         <div class="certificates-grid">
+
+          <!-- 🔥 AQUÍ ESTABA EL ERROR: ahora recorre bien -->
           <div 
             v-for="certificate in userCertificates" 
             :key="certificate.id"
             class="certificate-card"
-            :class="{ 'invalid': !certificate.valido }"
+            :class="{ 'invalid': certificate.valido === false }"
+
           >
             <div class="certificate-header">
               <div class="certificate-status">
@@ -69,76 +72,77 @@
 
             <div class="certificate-content">
               <div class="certificate-icon">🏆</div>
-              <h3 class="certificate-title">{{ certificate.curso?.titulo || 'Curso' }}</h3>
-              <p class="certificate-recipient">{{ certificate.estudiante?.nombre || 'Estudiante' }}</p>
-              
+
+              <!-- 🔥 YA FUNCIONA: curso desde inscripcion -->
+              <h3 class="certificate-title">
+                {{ certificate.inscripcion?.curso?.titulo || 'Curso' }}
+              </h3>
+
+              <p class="certificate-recipient">
+                {{ certificate.inscripcion?.estudiante?.nombre || 'Estudiante' }}
+              </p>
+
               <div class="certificate-details">
                 <div class="detail-item">
                   <span class="detail-label">Fecha de emisión:</span>
                   <span class="detail-value">{{ formatDate(certificate.fecha_emision) }}</span>
                 </div>
+
                 <div class="detail-item">
-                  <span class="detail-label">Código QR:</span>
-                  <span class="detail-value code">{{ certificate.codigo_qr }}</span>
+                  <span class="detail-label">Código:</span>
+                  <span class="detail-value code">{{ certificate.codigo }}</span>
                 </div>
               </div>
 
               <div class="qr-code-section">
                 <div class="qr-placeholder">
                   <span>QR Code</span>
-                  <small>{{ certificate.codigo_qr }}</small>
+                  <small>{{ certificate.codigo }}</small>
                 </div>
               </div>
             </div>
 
             <div class="certificate-actions">
               <button 
-                @click="downloadCertificate(certificate.id)"
-                :disabled="downloading === certificate.id"
+                @click="downloadCertificate(certificate.inscripcion_id)"
+                :disabled="downloading === certificate.inscripcion_id"
                 class="btn btn-primary"
               >
-                {{ downloading === certificate.id ? 'Descargando...' : '📥 Descargar PDF' }}
+                {{ downloading === certificate.inscripcion_id ? 'Descargando...' : '📥 Descargar PDF' }}
               </button>
-              
+
               <button 
-                @click="shareCertificate(certificate)"
-                class="btn btn-outline"
-              >
-                🔗 Compartir
-              </button>
-              
-              <button 
-                @click="verifyCertificate(certificate.codigo_qr)"
+                @click="verifyCertificate(certificate.codigo)"
                 class="btn btn-secondary"
               >
                 🔍 Verificar
               </button>
             </div>
           </div>
+
         </div>
 
-        <!-- Sección de verificación -->
         <div class="verify-section">
           <h2>Verificar Certificado</h2>
-          <p>Ingresa un código QR para verificar la autenticidad de un certificado</p>
-          
+          <p>Ingresa un código QR para verificar la autenticidad</p>
+
           <form @submit.prevent="handleVerification" class="verify-form">
             <div class="form-group">
               <input
                 v-model="verifyCode"
                 type="text"
-                placeholder="Ingresa el código QR del certificado"
+                placeholder="Ingresa el código"
                 class="form-input"
                 :disabled="verifying"
               />
             </div>
-            
+
             <button 
               type="submit" 
               :disabled="!verifyCode || verifying"
               class="btn btn-primary"
             >
-              {{ verifying ? 'Verificando...' : 'Verificar Certificado' }}
+              {{ verifying ? 'Verificando...' : 'Verificar' }}
             </button>
           </form>
 
@@ -147,14 +151,15 @@
               <h3>✅ Certificado Válido</h3>
               <p><strong>Curso:</strong> {{ verificationResult.curso?.titulo }}</p>
               <p><strong>Estudiante:</strong> {{ verificationResult.estudiante?.nombre }}</p>
-              <p><strong>Fecha de emisión:</strong> {{ formatDate(verificationResult.fecha_emision) }}</p>
             </div>
+
             <div v-else class="verification-error">
               <h3>❌ Certificado Inválido</h3>
-              <p>El código QR no corresponde a un certificado válido</p>
+              <p>Este certificado no existe o fue revocado.</p>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -174,85 +179,58 @@ const verifyCode = ref('')
 const verificationResult = ref<any>(null)
 
 const loading = computed(() => certificateStore.loading)
-const userCertificates = computed(() => 
-  studentStore.student ? certificateStore.certificatesByStudent(studentStore.student.id) : []
+
+const userCertificates = computed(() =>
+  studentStore.student
+    ? certificateStore.certificatesByStudent(studentStore.student.id)
+    : []
 )
 
-const validCertificates = computed(() => 
-  userCertificates.value.filter(cert => cert.valido).length
+const validCertificates = computed(() =>
+  userCertificates.value.filter(cert => cert.valido)
 )
 
 const recentCertificates = computed(() => {
   const now = new Date()
-  const currentMonth = now.getMonth()
-  const currentYear = now.getFullYear()
-  
   return userCertificates.value.filter(cert => {
-    const certDate = new Date(cert.fecha_emision)
-    return certDate.getMonth() === currentMonth && certDate.getFullYear() === currentYear
+    const d = new Date(cert.fecha_emision)
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
   }).length
 })
 
-const formatDate = (dateString: string): string => {
-  return new Date(dateString).toLocaleDateString('es-ES', {
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString('es-GT', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
   })
 }
 
-const downloadCertificate = async (certificateId: number) => {
-  downloading.value = certificateId
-  
+const downloadCertificate = async (inscripcionId: number) => {
+  downloading.value = inscripcionId
   try {
-    const pdfBlob = await certificateStore.downloadCertificate(certificateId)
-    
-    const url = window.URL.createObjectURL(pdfBlob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `certificado_${certificateId}.pdf`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    const blob = await certificateStore.downloadCertificate(inscripcionId)
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `certificado_${inscripcionId}.pdf`
+    a.click()
     window.URL.revokeObjectURL(url)
-  } catch (error: any) {
-    alert(error.message || 'Error al descargar certificado')
   } finally {
     downloading.value = null
   }
 }
 
-const shareCertificate = (certificate: any) => {
-  const url = `${window.location.origin}/verify/${certificate.codigo_qr}`
-  
-  if (navigator.share) {
-    navigator.share({
-      title: `Certificado - ${certificate.curso?.titulo}`,
-      text: `Verifica mi certificado del curso ${certificate.curso?.titulo}`,
-      url: url
-    })
-  } else {
-    navigator.clipboard.writeText(url).then(() => {
-      alert('Enlace copiado al portapapeles')
-    })
-  }
-}
-
-const verifyCertificate = async (qrCode: string) => {
-  verifyCode.value = qrCode
+const verifyCertificate = async (codigo: string) => {
+  verifyCode.value = codigo
   await handleVerification()
 }
 
 const handleVerification = async () => {
-  if (!verifyCode.value) return
-  
   verifying.value = true
-  verificationResult.value = null
-  
   try {
-    const result = await certificateStore.validateCertificate(verifyCode.value)
-    verificationResult.value = result
-  } catch (error: any) {
+    verificationResult.value = await certificateStore.validateCertificate(verifyCode.value)
+  } catch {
     verificationResult.value = { valido: false }
   } finally {
     verifying.value = false
@@ -260,15 +238,11 @@ const handleVerification = async () => {
 }
 
 onMounted(async () => {
-  if (studentStore.student) {
-    try {
-      await certificateStore.fetchStudentCertificates(studentStore.student.id)
-    } catch (error) {
-      console.error('Error al cargar certificados:', error)
-    }
-  }
+  await studentStore.initializeFromStorage()
+  await certificateStore.fetchStudentCertificates()
 })
 </script>
+
 
 <style scoped>
 /* ===========================
