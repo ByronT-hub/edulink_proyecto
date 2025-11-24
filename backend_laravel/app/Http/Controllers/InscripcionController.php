@@ -35,9 +35,20 @@ class InscripcionController extends Controller
         $inscripciones = Inscripcion::where('estudiante_id', $estudiante->id)
             ->with([
                 'curso.maestro:id,nombre',
-                'pagos:id,inscripcion_id,monto_centavos,estado,created_at'
+                'pagos:id,inscripcion_id,monto_centavos,estado,created_at',
+                'progreso:id,inscripcion_id,porcentaje,lecciones_completadas'
             ])
             ->get();
+
+        // 🔥 Cambiar estado a COMPLETADO automáticamente
+        foreach ($inscripciones as $inscripcion) {
+            if ($inscripcion->progreso && $inscripcion->progreso->porcentaje == 100) {
+                if ($inscripcion->estado !== 'completado') {
+                    $inscripcion->estado = 'completado';
+                    $inscripcion->save();
+                }
+            }
+        }
 
         return response()->json([
             'inscripciones' => $inscripciones
@@ -83,10 +94,6 @@ class InscripcionController extends Controller
         );
     }
 
-    /**
-     * NUEVA FUNCIÓN:
-     * Obtener inscripción real del estudiante según curso.
-     */
     public function findByCourse(Request $request, $cursoId)
     {
         $user = $request->auth_user;
