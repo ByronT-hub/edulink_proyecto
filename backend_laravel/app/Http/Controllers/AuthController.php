@@ -33,7 +33,7 @@ class AuthController extends Controller
             'intereses' => 'nullable|string|max:500'
         ]);
 
-        // Verificar correo único
+        
         if (
             Estudiante::where('correo', $data['correo'])->exists() ||
             Maestro::where('correo', $data['correo'])->exists() ||
@@ -45,7 +45,7 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // Crear usuario por rol
+        
         if ($data['role'] === 'estudiante') {
             $usuario = Estudiante::create([
                 'nombre' => $data['nombre'],
@@ -81,7 +81,7 @@ class AuthController extends Controller
             $mensaje = 'Administrador registrado exitosamente';
         }
 
-        // Generar JWT
+        
         $token = $this->generateToken($usuario, $data['role']);
 
         return response()->json([
@@ -110,14 +110,13 @@ class AuthController extends Controller
         $usuario = null;
         $tipoUsuario = null;
 
-        // Estudiante
+
         $estudiante = Estudiante::where('correo', $data['correo'])->first();
         if ($estudiante && Hash::check($data['contrasena'], $estudiante->contrasena)) {
             $usuario = $estudiante;
             $tipoUsuario = 'estudiante';
         }
 
-        // Maestro
         if (!$usuario) {
             $maestro = Maestro::where('correo', $data['correo'])->first();
             if ($maestro && Hash::check($data['contrasena'], $maestro->contrasena)) {
@@ -126,7 +125,6 @@ class AuthController extends Controller
             }
         }
 
-        // Admin
         if (!$usuario) {
             $admin = User::where('email', $data['correo'])->first();
             if ($admin && Hash::check($data['contrasena'], $admin->password)) {
@@ -139,7 +137,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Credenciales incorrectas'], 401);
         }
 
-        // JWT
+        
         $token = $this->generateToken($usuario, $tipoUsuario);
 
         return response()->json([
@@ -164,7 +162,6 @@ class AuthController extends Controller
         $user = $request->user();
         $role = $request->get('auth_role');
 
-        // Responder con todos los datos relevantes según el rol
         if ($role === 'maestro') {
             return response()->json([
                 'id' => $user->id,
@@ -185,7 +182,7 @@ class AuthController extends Controller
                 'telefono' => $user->telefono ?? null,
                 'carrera' => $user->carrera ?? null
             ]);
-        } else { // admin u otro
+        } else {
             return response()->json([
                 'id' => $user->id,
                 'nombre' => $user->name,
@@ -204,7 +201,7 @@ class AuthController extends Controller
             'user_id' => $user->id,
             'role' => $role,
             'iat' => time(),
-            'exp' => time() + (60 * 60), // 1 hora
+            'exp' => time() + (60 * 60),
         ];
 
         return JWT::encode($payload, env('JWT_SECRET'), 'HS256');

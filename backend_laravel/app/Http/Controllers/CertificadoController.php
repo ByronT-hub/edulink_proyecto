@@ -12,6 +12,28 @@ use Carbon\Carbon;
 class CertificadoController extends Controller
 {
     // ===============================
+    // 4. Validar certificado por código
+    // ===============================
+    public function validarPorCodigo($codigo)
+    {
+        $cert = Certificado::with(['inscripcion.curso', 'inscripcion.estudiante'])
+            ->where('codigo', $codigo)
+            ->first();
+
+        if ($cert) {
+            return response()->json([
+                'valido' => true,
+                'certificado' => $cert,
+                'curso' => $cert->inscripcion->curso ?? null,
+                'estudiante' => $cert->inscripcion->estudiante ?? null,
+            ]);
+        } else {
+            return response()->json([
+                'valido' => false
+            ]);
+        }
+    }
+    // ===============================
     // 1. Obtener mis certificados
     // ===============================
     public function misCertificados(Request $request)

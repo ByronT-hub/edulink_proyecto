@@ -147,7 +147,10 @@
 
           <div v-if="verificationResult" class="verification-result">
             <div v-if="verificationResult.valido" class="verification-success">
-              <h3>✅ Certificado Válido</h3>
+              <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.7rem;">
+                <span class="status-badge valid">✅ VÁLIDO</span>
+                <h3 style="margin: 0;">Certificado Válido</h3>
+              </div>
               <p><strong>Curso:</strong> {{ verificationResult.curso?.titulo }}</p>
               <p><strong>Estudiante:</strong> {{ verificationResult.estudiante?.nombre }}</p>
             </div>

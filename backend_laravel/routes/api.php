@@ -39,6 +39,26 @@ Route::post('/auth/register', [AuthController::class, 'register']);
 // ======================
 
 Route::middleware(['simple_auth'])->group(function () {
+    // ======================
+    // ADMIN: Gestión de estudiantes y maestros
+    // ======================
+    Route::get('/admin/estudiantes', [AdminController::class, 'getEstudiantes']);
+    Route::put('/admin/estudiantes/{id}', [EstudianteController::class, 'updatePerfil']);
+    Route::delete('/admin/estudiantes/{id}', [AdminController::class, 'eliminarUsuario'])->defaults('tipo', 'estudiante');
+
+    Route::get('/admin/maestros', [AdminController::class, 'getMaestros']);
+    Route::put('/admin/maestros/{id}', [MaestroController::class, 'actualizarPerfil']);
+    Route::delete('/admin/maestros/{id}', [AdminController::class, 'eliminarUsuario'])->defaults('tipo', 'maestro');
+
+    // ======================
+    // MÉTRICAS
+    // ======================
+    Route::get('/metricas/resumen', [MetricasController::class, 'resumen']);
+
+    // MAESTRO: Obtener cursos del maestro
+    Route::get('/maestros/{id}/cursos', [MaestroController::class, 'misCursos']);
+    // MAESTRO: Crear curso
+    Route::post('/maestros/cursos', [MaestroController::class, 'crearCurso']);
 
     // AUTH
     Route::post('/auth/logout', [AuthController::class, 'logout']);
@@ -69,9 +89,20 @@ Route::middleware(['simple_auth'])->group(function () {
     Route::get('/progresos/{inscripcionId}', [ProgresoController::class, 'show']);
     Route::put('/progresos/{inscripcionId}', [ProgresoController::class, 'update']);
 
+
+    // MAESTRO: Buscar estudiantes (legacy y nueva ruta)
+    Route::get('/maestros/estudiantes', [MaestroController::class, 'buscarEstudiantes']);
+    Route::get('/maestros/estudiantes/buscar', [MaestroController::class, 'buscarEstudiantes']);
+
+    // PERFIL MAESTRO
+    Route::get('/maestros/{id}/perfil', [MaestroController::class, 'perfil']);
+    Route::put('/maestros/{id}/perfil', [MaestroController::class, 'actualizarPerfil']);
+
 // CERTIFICADOS
 Route::get('/mis-certificados', [CertificadoController::class, 'misCertificados']);
 Route::get('/certificados/{id}', [CertificadoController::class, 'show']);
+// Validar certificado por código
+Route::get('/certificados/validar/{codigo}', [CertificadoController::class, 'validarPorCodigo']);
 Route::get('/certificados/{inscripcionId}/descargar', [CertificadoController::class, 'descargar']);
 
 
